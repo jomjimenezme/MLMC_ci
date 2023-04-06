@@ -1,0 +1,39 @@
+
+
+**NOTE** :
+
+this repository is a copy of https://github.com/sbacchio/DDalphaAMG (soon to be embedded within it). We have improved the coarsest-level solves here by moving from plain GMRES to GCRO-DR + Polynomial Preconditioner + Pipelining + Block Jacobi (the BJ blocks are solved through a local polynomial preconditioner). The use of MPI, OpenMP and SSE vectorization is kept throughout these new implementations.
+
+For more information on these coarsest-level improvements, contact : g.ramirez@stimulate-ejd.eu
+
+
+
+
+---------------------------
+
+The DDalphaAMG solver library is an inverter for Wilson-Clover fermions from lattice QCD.
+
+This is the branch sbacchio/master: it includes the twisted mass fermions and a personalized
+  version of the library.
+
+INSTALL:
+
+  The main directory contains a makefile example. The standard makefile
+  should work with a few adjustments (compiler and MPI library) on the 
+  machine of your choice. Please note, that the code was built in a 
+  generic manner. Thus, the actual code for compilation is created by 
+  the makefile via pattern substitution right before the compilation.
+  This part of the makefile should not be removed. Once the necessary 
+  adjustments of the makefile are done, the command 
+  "make -f yourmakefile -j numberofthreads wilson"
+  should compile the whole entire Wilson solver code, such that it is
+  ready to be run. The makefile contains additional rules "library" and
+  "documentation" for compiling the code as a library and for compiling
+  the user documentation. the library interface can be found in the
+  "include" folder.
+
+HOWTO:
+
+  After having compiled the user documentation via
+  "make documentation" please consult the compiled PDF in /doc for
+  further information.

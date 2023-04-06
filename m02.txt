@@ -1,0 +1,1191 @@
+
++- subspace correction methods for QCD applications -+
+|                                                    |
+|  Use option >> -? << for help                      |
+|                                                    |
++----------------------------------------------------+
+
+
+Number of Processes: 32
+Program is being started...
+
+
+
++----------------------------------------------------------+
+| The DDalphaAMG solver library.                           |
+| Copyright (C) 2016, Matthias Rottmann, Artur Strebel,    |
+|       Simon Heybrock, Simone Bacchio, Bjoern Leder.      |
+|                                                          |
+| This program comes with ABSOLUTELY NO WARRANTY.          |
++----------------------------------------------------------+
+
+configuration: conf/qcdsf.632.01000.mg2
+
+Desired average plaquette: 1.6479691428981 in [0,3]
+BASIS0:OPENQCD/DD-HMC BASIS
+periodic in time boundary conditions
+Configuration stored...
+average plaquette: 1.6479691428981
+
++----------------------------------------------------------+
+| read in and set up the parallel dirac operator           |
+| elapsed wall clock time: 1.41936      seconds            |
++----------------------------------------------------------+
+initial definition --- depth: 0
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+depth: 0, time spent for setting up next coarser operator: 32.349875 seconds
+initial definition --- depth: 1
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+depth: 1, time spent for setting up next coarser operator: 0.725710 seconds
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+
+initial coarse grid correction is defined
+elapsed time: 87.945150 seconds
+
++----------------------------------------------------------+
+| 3-level method                                           |
+| postsmoothing K-cycle                                    |
+| FGMRES + red-black multiplicative Schwarz                |
+|          restart length: 10                              |
+|                      m0: -0.334450                       |
+|                     csw: +1.919200                       |
++----------------------------------------------------------+
+|   preconditioner cycles: 1                               |
+|            inner solver: minimal residual iteration      |
+|               precision: double                          |
++---------------------- depth  0 --------------------------+
+|          global lattice: 64  32  32  32                  |
+|           local lattice: 8   8   32  32                  |
+|           block lattice: 4   4   4   4                   |
+|        post smooth iter: 3                               |
+|     smoother inner iter: 4                               |
+|              setup iter: 5                               |
+|            test vectors: 24                              |
++---------------------- depth  1 --------------------------+
+|          global lattice: 16  8   8   8                   |
+|           local lattice: 2   2   8   8                   |
+|           block lattice: 2   2   2   2                   |
+|        post smooth iter: 3                               |
+|     smoother inner iter: 4                               |
+|              setup iter: 4                               |
+|            test vectors: 28                              |
++---------------------- depth  2 --------------------------+
+|          global lattice: 8   4   4   4                   |
+|           local lattice: 1   1   4   4                   |
+|           block lattice: 1   1   1   1                   |
+|      coarge grid solver: odd even GMRES                  |
+|              iterations: 100                             |
+|                  cycles: 20                              |
+|               tolerance: 1e-01                           |
++----------------------------------------------------------+
+|          K-cycle length: 5                               |
+|        K-cycle restarts: 2                               |
+|       K-cycle tolerance: 1e-01                           |
++----------------------------------------------------------+
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.43e-01(     24) |
+|      2 flop vector operations, double: 4.37e-01(    168) |
+|      8 flop vector operations, double: 7.09e-01(    576) |
+|               copy operations, double: 3.00e+00(    817) |
+|          set value operations, double: 2.30e+00( 221352) |
+| interpolation and restriction, double: 1.95e+00(     24) |
+|                 self coupling, double: 3.07e+00( 147456) |
+|                      smoother, double: 4.22e+01(    144) |
+|            operator comm init, double: 4.14e-03(    864) |
+|            operator comm wait, double: 8.67e+00(    864) |
+|                    allreduces, double: 3.77e-02(     24) |
+|    Gram-Schmidt on aggregates, double: 9.72e-01(      1) |
+|     smoother - pt 3, res comm, double: 2.55e+00(  36864) |
+|   smoother - pt 4, solve comm, double: 2.88e+01(  36864) |
++----------------------------------------------------------+
+| depth:   1 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 7.35e-03(     28) |
+|      2 flop vector operations, double: 5.80e-03(    196) |
+|      8 flop vector operations, double: 3.50e-02(   1344) |
+|               copy operations, double: 7.07e-02(   1168) |
+|          set value operations, double: 5.84e-02(  17504) |
+|                      smoother, double: 6.44e+00(    168) |
+|            operator comm init, double: 2.50e-03(   1008) |
+|            operator comm wait, double: 1.44e+00(   1008) |
+|                    allreduces, double: 5.17e-03(     28) |
+|    Gram-Schmidt on aggregates, double: 1.39e-02(      1) |
+|     smoother - pt 3, res comm, double: 8.05e-01(   2688) |
+|   smoother - pt 4, solve comm, double: 4.15e+00(   2688) |
++----------------------------------------------------------+
+| depth:   2 / level:   0                time    ( count ) |
++----------------------------------------------------------+
++----------------------------------------------------------+
+| flop/lattice site:  8.33e+07                             |
+| flop/s/MPIprocess:  6.21e+10                             |
++----------------------------------------------------------+
+
+depth: 0, bootstrap step number 1...
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 0, time spent for setting up next coarser operator: 32.341440 seconds
+depth: 1, time spent for setting up next coarser operator: 0.744855 seconds
+depth: 1, bootstrap step number 1...
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 1, time spent for setting up next coarser operator: 0.729227 seconds
+depth: 0, bootstrap step number 2...
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 0, time spent for setting up next coarser operator: 32.382076 seconds
+depth: 1, time spent for setting up next coarser operator: 0.756429 seconds
+depth: 1, bootstrap step number 1...
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 1, time spent for setting up next coarser operator: 0.730517 seconds
+depth: 1, bootstrap step number 2...
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+depth: 1, time spent for setting up next coarser operator: 0.729111 seconds
+depth: 0, bootstrap step number 3...
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+depth: 0, time spent for setting up next coarser operator: 32.386038 seconds
+depth: 1, time spent for setting up next coarser operator: 0.767556 seconds
+depth: 1, bootstrap step number 1...
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 1, time spent for setting up next coarser operator: 0.730357 seconds
+depth: 1, bootstrap step number 2...
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+depth: 1, time spent for setting up next coarser operator: 0.731074 seconds
+depth: 0, bootstrap step number 4...
+coarsest gmres iters = 15
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 9
+coarsest gmres iters = 13
+coarsest gmres iters = 14
+coarsest gmres iters = 8
+Quite a lot of iterations. Let's try and construct a deflation/recycling subspace
+Arnoldi time : 0.2473592140 seconds
+GEVP time : 0.0054080500
+coarsest gmres iters = 26
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 3
+coarsest gmres iters = 11
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 10
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 3
+coarsest gmres iters = 8
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 11
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 7
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 3
+coarsest gmres iters = 10
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 11
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 8
+coarsest gmres iters = 3
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 7
+coarsest gmres iters = 11
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 10
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 7
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 8
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+depth: 0, time spent for setting up next coarser operator: 32.379949 seconds
+depth: 1, time spent for setting up next coarser operator: 0.738231 seconds
+depth: 1, bootstrap step number 1...
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 2
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 2
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 2
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+coarsest gmres iters = 1
+depth: 1, time spent for setting up next coarser operator: 0.729595 seconds
+depth: 1, bootstrap step number 2...
+coarsest gmres iters = 9
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+coarsest gmres iters = 8
+coarsest gmres iters = 8
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 8
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+depth: 1, time spent for setting up next coarser operator: 0.731693 seconds
+depth: 1, bootstrap step number 3...
+Quite a lot of iterations. Let's try and construct a deflation/recycling subspace
+Arnoldi time : 0.2468541100 seconds
+GEVP time : 0.0048000240
+coarsest gmres iters = 26
+coarsest gmres iters = 11
+coarsest gmres iters = 9
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 11
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 11
+coarsest gmres iters = 13
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 9
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 8
+coarsest gmres iters = 10
+coarsest gmres iters = 9
+coarsest gmres iters = 10
+coarsest gmres iters = 9
+depth: 1, time spent for setting up next coarser operator: 0.731764 seconds
+depth: 0, bootstrap step number 5...
+Quite a lot of iterations. Let's try and construct a deflation/recycling subspace
+Arnoldi time : 0.2470623550 seconds
+GEVP time : 0.0046994830
+coarsest gmres iters = 26
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 6
+coarsest gmres iters = 8
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 7
+coarsest gmres iters = 9
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 10
+coarsest gmres iters = 3
+coarsest gmres iters = 4
+coarsest gmres iters = 7
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 7
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 7
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 10
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 4
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 8
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 11
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 8
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+coarsest gmres iters = 8
+coarsest gmres iters = 5
+coarsest gmres iters = 4
+coarsest gmres iters = 9
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 9
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+depth: 0, time spent for setting up next coarser operator: 32.402303 seconds
+depth: 1, time spent for setting up next coarser operator: 0.751567 seconds
+depth: 1, bootstrap step number 1...
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 2
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 3
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 3
+coarsest gmres iters = 2
+coarsest gmres iters = 2
+coarsest gmres iters = 3
+coarsest gmres iters = 3
+coarsest gmres iters = 1
+coarsest gmres iters = 2
+depth: 1, time spent for setting up next coarser operator: 0.730765 seconds
+depth: 1, bootstrap step number 2...
+coarsest gmres iters = 9
+coarsest gmres iters = 8
+coarsest gmres iters = 9
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 7
+coarsest gmres iters = 7
+coarsest gmres iters = 11
+coarsest gmres iters = 12
+coarsest gmres iters = 7
+coarsest gmres iters = 8
+coarsest gmres iters = 7
+coarsest gmres iters = 7
+coarsest gmres iters = 7
+coarsest gmres iters = 8
+coarsest gmres iters = 7
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+coarsest gmres iters = 8
+coarsest gmres iters = 7
+coarsest gmres iters = 8
+coarsest gmres iters = 6
+coarsest gmres iters = 7
+coarsest gmres iters = 7
+coarsest gmres iters = 6
+coarsest gmres iters = 10
+coarsest gmres iters = 5
+depth: 1, time spent for setting up next coarser operator: 0.731101 seconds
+depth: 1, bootstrap step number 3...
+coarsest gmres iters = 16
+coarsest gmres iters = 13
+coarsest gmres iters = 16
+coarsest gmres iters = 18
+coarsest gmres iters = 16
+coarsest gmres iters = 15
+coarsest gmres iters = 14
+Quite a lot of iterations. Let's try and construct a deflation/recycling subspace
+Arnoldi time : 0.2468193540 seconds
+GEVP time : 0.0048082000
+coarsest gmres iters = 26
+coarsest gmres iters = 9
+coarsest gmres iters = 11
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 11
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 10
+coarsest gmres iters = 8
+coarsest gmres iters = 12
+coarsest gmres iters = 9
+coarsest gmres iters = 10
+coarsest gmres iters = 9
+coarsest gmres iters = 9
+depth: 1, time spent for setting up next coarser operator: 0.729466 seconds
+depth: 1, bootstrap step number 4...
+coarsest gmres iters = 8
+coarsest gmres iters = 14
+coarsest gmres iters = 11
+coarsest gmres iters = 13
+coarsest gmres iters = 12
+coarsest gmres iters = 13
+coarsest gmres iters = 14
+coarsest gmres iters = 16
+coarsest gmres iters = 12
+coarsest gmres iters = 13
+coarsest gmres iters = 10
+coarsest gmres iters = 13
+coarsest gmres iters = 13
+coarsest gmres iters = 14
+coarsest gmres iters = 12
+coarsest gmres iters = 14
+coarsest gmres iters = 12
+coarsest gmres iters = 13
+coarsest gmres iters = 13
+coarsest gmres iters = 16
+coarsest gmres iters = 13
+coarsest gmres iters = 17
+coarsest gmres iters = 10
+coarsest gmres iters = 12
+coarsest gmres iters = 10
+coarsest gmres iters = 13
+coarsest gmres iters = 13
+coarsest gmres iters = 10
+depth: 1, time spent for setting up next coarser operator: 0.731675 seconds
+
+performed 5 iterative setup steps
+elapsed time: 501.391063 seconds (93.781698 seconds on coarse grid)
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.11e+00(    240) |
+|         process inner product, double: 9.00e+00(    120) |
+|      2 flop vector operations, double: 3.10e+00(    720) |
+|      8 flop vector operations, double: 1.63e+01(   2820) |
+|       other vector operations, double: 2.53e+01(      5) |
+|               copy operations, double: 5.55e+00(   1800) |
+|          set value operations, double: 1.10e+00( 552960) |
+| interpolation and restriction, double: 2.03e+01(    240) |
+|                 self coupling, double: 9.03e+00( 399360) |
+|                      smoother, double: 1.09e+02(    360) |
+|            operator comm init, double: 1.85e-02(   2880) |
+|            operator comm wait, double: 1.96e+01(   2880) |
+|                    allreduces, double: 5.18e-01(    355) |
+|    Gram-Schmidt on aggregates, double: 4.87e+00(      5) |
+|     smoother - pt 3, res comm, double: 1.39e+01(  92160) |
+|   smoother - pt 4, solve comm, double: 7.11e+01(  92160) |
++----------------------------------------------------------+
+| depth:   1 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 5.51e+00(   1386) |
+|         process inner product, double: 2.24e-01(    788) |
+|      2 flop vector operations, double: 2.20e-01(   4560) |
+|      6 flop vector operations, double: 1.14e-02(    120) |
+|      8 flop vector operations, double: 6.84e-01(  24828) |
+|       other vector operations, double: 5.98e-01(     12) |
+|               copy operations, double: 5.04e-01(  11184) |
+|          set value operations, double: 4.66e-01( 286888) |
+| interpolation and restriction, double: 2.40e+00(   1576) |
+|                 self coupling, double: 7.37e-01(    474) |
+|             neighbor coupling, double: 1.16e+01(    474) |
+|                      smoother, double: 1.01e+02(   2364) |
+|            operator comm init, double: 5.40e-02(  20808) |
+|            operator comm wait, double: 1.61e+01(  20808) |
+|                    allreduces, double: 6.01e+00(   2162) |
+|    Gram-Schmidt on aggregates, double: 4.76e-01(     34) |
+|     smoother - pt 3, res comm, double: 2.82e+01(  37824) |
+|   smoother - pt 4, solve comm, double: 5.81e+01(  37824) |
+|          Hessenberg: qr update double: 2.71e-04(   6288) |
+|         Hessenberg: bkwd subst double: 5.07e-05(   1500) |
++----------------------------------------------------------+
+| depth:   2 / level:   0                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 2.95e-01(   1331) |
+|         process inner product, double: 1.01e-01(   2192) |
+|      2 flop vector operations, double: 6.03e-02(  33711) |
+|      6 flop vector operations, double: 4.64e-05(      8) |
+|      8 flop vector operations, double: 2.35e-01( 133658) |
+|               copy operations, double: 6.76e-02(  25152) |
+|          set value operations, double: 2.68e-01( 206915) |
+|                 self coupling, double: 2.51e+00(  20284) |
+|             neighbor coupling, double: 2.76e+01(  20284) |
+|            operator comm init, double: 1.38e-01( 162272) |
+|            operator comm wait, double: 5.93e+00( 162272) |
+|                    allreduces, double: 1.26e+00(   6699) |
+|          Hessenberg: qr update double: 1.23e-03( 101280) |
+|         Hessenberg: bkwd subst double: 2.90e-04(  10328) |
++----------------------------------------------------------+
+| flop/lattice site:  2.32e+08                             |
+| flop/s/MPIprocess:  3.03e+10                             |
++----------------------------------------------------------+
+
+rhs = ones
+source vector norm: 5.016555e+03
+
+Pre-constructing coarsest-level data ...
+GEVP time : 0.0043912520
+coarsest gmres iters = 26
+... done
+
++----------------------------------------------------------+
+coarsest gmres iters = 2
+| approx. rel. res. after  1      iterations: 5.974859e-02 |
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+| approx. rel. res. after  2      iterations: 1.290961e-02 |
+coarsest gmres iters = 3
+coarsest gmres iters = 5
+| approx. rel. res. after  3      iterations: 3.405989e-03 |
+coarsest gmres iters = 4
+coarsest gmres iters = 6
+| approx. rel. res. after  4      iterations: 9.123536e-04 |
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+| approx. rel. res. after  5      iterations: 2.488541e-04 |
+coarsest gmres iters = 5
+coarsest gmres iters = 6
+| approx. rel. res. after  6      iterations: 6.898730e-05 |
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+| approx. rel. res. after  7      iterations: 1.908864e-05 |
+coarsest gmres iters = 6
+coarsest gmres iters = 4
+| approx. rel. res. after  8      iterations: 5.311523e-06 |
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+| approx. rel. res. after  9      iterations: 1.490946e-06 |
+coarsest gmres iters = 6
+coarsest gmres iters = 5
+| approx. rel. res. after  10     iterations: 4.186962e-07 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  11     iterations: 1.283590e-07 |
+coarsest gmres iters = 5
+coarsest gmres iters = 5
+| approx. rel. res. after  12     iterations: 3.684333e-08 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  13     iterations: 9.995319e-09 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  14     iterations: 2.889756e-09 |
+coarsest gmres iters = 7
+coarsest gmres iters = 4
+| approx. rel. res. after  15     iterations: 7.663810e-10 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  16     iterations: 2.153084e-10 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  17     iterations: 5.999710e-11 |
+coarsest gmres iters = 7
+coarsest gmres iters = 5
+| approx. rel. res. after  18     iterations: 1.689761e-11 |
+coarsest gmres iters = 6
+coarsest gmres iters = 6
+| approx. rel. res. after  19     iterations: 4.755061e-12 |
++----------------------------------------------------------+
+
++----------------------------------------------------------+
+|       FGMRES iterations: 19     coarse average: 10.32    |
+| exact relative residual: ||r||/||b|| = 4.755061e-12      |
+| elapsed wall clock time: 34.0155  seconds                |
+|        coarse grid time: 8.0873   seconds (23.8%)        |
+|        coarsest grid time: 2.1348   seconds (06.3%)        |
+| coarsest grid matmul time: 1.4955   seconds (04.4%)        |
+|     coarsest grid BJ time: 0.3776   seconds (01.1%)        |
+| coarsest grid GCRODR LSP time: 0.0001   seconds (00.0%)        |
+| coarsest grid GCRODR AB time: 0.0000   seconds (00.0%)        |
+| coarsest grid GCRODR CU time: 0.0000   seconds (00.0%)        |
+|  consumed core minutes*: 1.81e+01 (solve only)           |
+|    max used mem/MPIproc: 2.45e+00 GB                     |
++----------------------------------------------------------+
+*: only correct if #MPIprocs*#threads == #CPUs
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 9.11e-02(     21) |
+|         process inner product, double: 7.04e-01(     19) |
+|      2 flop vector operations, double: 3.95e-01(     98) |
+|      6 flop vector operations, double: 1.16e-02(      1) |
+|      8 flop vector operations, double: 1.52e+00(    346) |
+|               copy operations, double: 7.68e-01(    267) |
+|          set value operations, double: 1.74e-01(  87552) |
+| interpolation and restriction, double: 3.20e+00(     38) |
+|                 self coupling, double: 1.93e+00(  63252) |
+|             neighbor coupling, double: 2.06e+00(     20) |
+|                      smoother, double: 1.73e+01(     57) |
+|            operator comm init, double: 3.66e-03(    536) |
+|            operator comm wait, double: 3.69e+00(    536) |
+|                    allreduces, double: 2.00e-01(     40) |
+|     smoother - pt 3, res comm, double: 2.19e+00(  14592) |
+|   smoother - pt 4, solve comm, double: 1.12e+01(  14592) |
+|          Hessenberg: qr update double: 2.52e-05(    600) |
+|         Hessenberg: bkwd subst double: 2.80e-06(    119) |
++----------------------------------------------------------+
+| depth:   1 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 6.96e-02(     56) |
+|         process inner product, double: 2.19e-03(     37) |
+|      2 flop vector operations, double: 1.05e-02(    204) |
+|      6 flop vector operations, double: 1.77e-03(     19) |
+|      8 flop vector operations, double: 2.50e-02(    961) |
+|               copy operations, double: 1.47e-02(    426) |
+|          set value operations, double: 6.71e-03(   1822) |
+| interpolation and restriction, double: 1.11e-01(     74) |
+|                 self coupling, double: 5.82e-02(     37) |
+|             neighbor coupling, double: 9.11e-01(     37) |
+|                      smoother, double: 4.76e+00(    111) |
+|            operator comm init, double: 2.81e-03(   1036) |
+|            operator comm wait, double: 8.26e-01(   1036) |
+|                    allreduces, double: 1.06e-01(     93) |
+|     smoother - pt 3, res comm, double: 1.33e+00(   1776) |
+|   smoother - pt 4, solve comm, double: 2.73e+00(   1776) |
+|          Hessenberg: qr update double: 1.98e-05(    330) |
+|         Hessenberg: bkwd subst double: 3.19e-06(     92) |
++----------------------------------------------------------+
+| depth:   2 / level:   0                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.90e-02(     74) |
+|         process inner product, double: 9.39e-03(    116) |
+|      2 flop vector operations, double: 3.10e-03(   1808) |
+|      8 flop vector operations, double: 1.67e-02(   8495) |
+|               copy operations, double: 3.58e-03(   1342) |
+|          set value operations, double: 1.39e-02(  11106) |
+|                 self coupling, double: 1.37e-01(   1091) |
+|             neighbor coupling, double: 1.49e+00(   1091) |
+|            operator comm init, double: 7.40e-03(   8728) |
+|            operator comm wait, double: 3.17e-01(   8728) |
+|                    allreduces, double: 7.32e-02(    381) |
+|          Hessenberg: qr update double: 4.90e-05(   3858) |
++----------------------------------------------------------+
+| flop/lattice site:  3.59e+07                             |
+| flop/s/MPIprocess:  6.92e+10                             |
++----------------------------------------------------------+
+
+avg coarsest iters = 5.297297
+solution vector norm: 2.433522e+03
+[31mwarning: amount of not freed memory: 0.020412 MB
+[0m
