@@ -474,7 +474,8 @@
 #endif
 
     int setup_phase_ctr;
-
+    
+    int if_rademacher;
   } global_struct;
 
   extern global_struct g;

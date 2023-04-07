@@ -54,3 +54,23 @@ void vector_PRECISION_define_random( vector_PRECISION phi, int start, int end, l
   if(thread == 0 && start != end)
     PROF_PRECISION_STOP( _SET, 1 );
 }
+
+
+void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start, int end, level_struct *l ) {
+  
+  int thread = omp_get_thread_num();
+  if(thread == 0 && start != end)
+  PROF_PRECISION_START( _SET );
+  if ( phi != NULL ) {
+    int i;
+    for ( i=start; i<end; i++ )
+      if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i]=  (double) (-1);
+      else phi[i]= (PRECISION)(1);
+  } else {
+    error0("Error in \"vector_PRECISION_define_random\": pointer is null\n");
+  }
+  if(thread == 0 && start != end)
+  PROF_PRECISION_STOP( _SET, 1 );
+  
+}
+

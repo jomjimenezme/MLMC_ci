@@ -48,7 +48,10 @@ void rhs_define( vector_double rhs, level_struct *l, struct Thread *threading ) 
   } else if ( g.rhs == 2 ) {
     // this would yield different results if we threaded it, so we don't
     START_LOCKED_MASTER(threading)
-    vector_double_define_random( rhs, 0, l->inner_vector_size, l );
+    if ( g.if_rademacher==1 )
+      vector_double_define_random_rademacher( rhs, 0, l->inner_vector_size, l );
+    else
+      vector_double_define_random( rhs, 0, l->inner_vector_size, l );
     END_LOCKED_MASTER(threading)
     START_MASTER(threading)
     if ( g.print > 0 ) printf0("rhs = random\n");

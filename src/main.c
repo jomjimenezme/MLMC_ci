@@ -77,6 +77,7 @@ int main( int argc, char **argv ) {
   
   THREADED(g.num_openmp_processes)
   {
+    g.if_rademacher=0;
     g.on_solve = 0;
     struct Thread threading;
     setup_threading(&threading, commonthreaddata, &l);
@@ -158,8 +159,17 @@ int main( int argc, char **argv ) {
     }
 #endif
 
+//TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
+    l.h_double.max_iters = 5;
+    l.h_double.min_iters = 5;
+    l.h_double.trace_tol = 1.0e-4;
+    hutchinson_diver_double_init( &l, &threading );  
+    hutchinson_diver_double_alloc( &l, &threading );
+
     g.on_solve = 1;
-    solve_driver( &l, &threading );
+    //solve_driver( &l, &threading );
+
+    hutchinson_diver_double_free( &l, &threading );
   }
   
   finalize_common_thread_data(commonthreaddata);
