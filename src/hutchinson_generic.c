@@ -121,12 +121,6 @@
     double t1 = MPI_Wtime();
 
     START_MASTER(threading);
-//    if(g.my_rank==0) printf( "%d\t \n", i);
-
-//    if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \n", i, CSPLIT(variance));
-
-
-//    if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \t t = %f\n", i, CSPLIT(variance), t1-t0);
 
 
     if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \t t = %f, \t d = %.3f\n", i, CSPLIT(variance), t1-t0, h->tol_per_level[l->depth]);
@@ -247,6 +241,124 @@
     return trace;
   }
 
+
+
+  // apply the interpolation
+  void apply_P_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct* l, struct Thread *threading ){
+
+    if( l->depth==0 ){
+      interpolate3_PRECISION( l->sbuf_PRECISION[0], in, l, threading );
+      trans_back_PRECISION( out, l->sbuf_PRECISION[0], l->s_PRECISION.op.translation_table, l, threading );
+    }
+    else{
+      interpolate3_PRECISION( out, in, l, threading );
+    }
+  }
+
+
+  // apply the restriction
+  void apply_R_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct* l, struct Thread *threading ){
+
+    if( l->depth==0 ){
+      trans_PRECISION( l->sbuf_PRECISION[0], in, l->s_PRECISION.op.translation_table, l, threading );     
+      restrict_PRECISION( out, l->sbuf_PRECISION[0], l, threading );
+    }
+    else{
+      restrict_PRECISION( out, in, l, threading );
+    }
+  }
+
+
+ // the term tr( A_{l}^{-1} - P A_{l+1}^{-1} R )
+  complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+
+    // FIRST TERM : result stored in p->x
+    // apply A_{l}^{-1}
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+      // solution of this solve is in l->p_PRECISION.x
+      apply_solver_PRECISION( l, threading );
+    }
+
+    // SECOND TERM : result stored in h->mlmc_b2
+    // 1. Restrict
+    // 2. invert
+    // 3. Prolongate
+    {
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      
+      apply_R_PRECISION( l->next_level->p_PRECISION.b, h->rademacher_vector, l, threading );
+      // the input of this solve is l->next_level->p_PRECISION.x, the output l->next_level->p_PRECISION.b
+      apply_solver_PRECISION( l->next_level, threading );
+      apply_P_PRECISION( h->mlmc_b2, l->next_level->p_PRECISION.x, l, threading );
+    }
+
+    // subtract the results and perform dot product
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
+
+      if(l->depth ==0 && 1==0){
+        hutchinson_deflate_vector_PRECISION(h->rademacher_vector, l, threading);
+      }
+      return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );   
+    }
+  }
+
+
+
+  complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "Trace computation via 'traditional' difference levels ...\n" );
+    END_MASTER(thrading);
+
+    int i;
+    complex_PRECISION trace = 0.0;
+    struct sample estimate;
+    hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
+    level_struct* lx;
+
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\tdifference levels ...\n" );
+    END_MASTER(thrading);
+    
+    // for all but coarsest level
+    lx = l;
+    for( i=0; i<g.num_levels-1;i++ ){
+      // set the pointer to the mlmc difference operator
+      h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
+      estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+      trace += estimate.acc_trace/estimate.sample_size;
+      lx = lx->next_level;
+    }
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    END_MASTER(thrading);
+    
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
+    END_MASTER(thrading);
+    
+    // coarsest level
+    // set the pointer to the coarsest-level Hutchinson estimator
+    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    trace += estimate.acc_trace/estimate.sample_size;
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    END_MASTER(thrading);
+    
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "... done\n" );
+    END_MASTER(thrading);
+
+    return trace;
+  }
 
 
 
