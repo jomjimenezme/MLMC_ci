@@ -160,14 +160,25 @@ int main( int argc, char **argv ) {
 #endif
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
+    struct Thread *threadingx = &threading;  
     l.h_double.max_iters = 5;
     l.h_double.min_iters = 5;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
     hutchinson_diver_double_alloc( &l, &threading );
+    //TODO: Is this the right way to distribute work? (code + algorithm)
+    hutchinson_double_struct* h = &(l.h_double);
+    h->tol_per_level = malloc(sizeof(double)*l.depth);
+    h->tol_per_level[0] = sqrt(0.75);
+    h->tol_per_level[1] = sqrt(0.20);
+    h->tol_per_level[2] = sqrt(0.05);
 
     g.on_solve = 1;
     //solve_driver( &l, &threading );
+
+    hutchinson_driver_double( &l, &threading );
+
+    SYNC_MASTER_TO_ALL(threadingx)
 
     hutchinson_diver_double_free( &l, &threading );
   }

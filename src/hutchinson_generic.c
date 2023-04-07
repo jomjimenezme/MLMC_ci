@@ -121,8 +121,19 @@
     double t1 = MPI_Wtime();
 
     START_MASTER(threading);
+//    if(g.my_rank==0) printf( "%d\t \n", i);
+
+//    if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \n", i, CSPLIT(variance));
+
+
+//    if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \t t = %f\n", i, CSPLIT(variance), t1-t0);
+
+
     if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \t t = %f, \t d = %.3f\n", i, CSPLIT(variance), t1-t0, h->tol_per_level[l->depth]);
+
+
     END_MASTER(threading);
+
     estimate.sample_size = i;
 
     free(samples);
@@ -219,7 +230,9 @@
     h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
     
     double t_plain = MPI_Wtime();
+
     estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    
     trace += estimate.acc_trace/estimate.sample_size;
     double t_plain1 = MPI_Wtime();
     START_MASTER(threading);
