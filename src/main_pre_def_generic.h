@@ -214,6 +214,44 @@
 #endif
   } gmres_PRECISION_struct;
 
+
+
+typedef struct {
+   
+       
+    complex_PRECISION rough_trace;
+
+    
+    vector_PRECISION mlmc_b1;
+    vector_PRECISION mlmc_b2;
+
+    // to store the Rademacher vector    
+    vector_PRECISION rademacher_vector;
+
+    complex_PRECISION rt;
+    complex_PRECISION trace;
+       
+    int nr_rough_ests, block_size;
+    int max_iters, min_iters;
+    
+    double trace_tol;
+    double *tol_per_level;
+    
+    // enforcing this at the coarsest level for ~10^-1 solves
+    int tmp_length;
+    
+    // FIXME : make this int a sort of input parameter ?
+    int low_tol_restart_length;
+    
+    // this functional returns the estimate needed by Hutchinson at each iteration
+    complex_PRECISION (*hutch_compute_one_sample)();
+    
+    
+    
+  } hutchinson_PRECISION_struct;
+
+
+
   typedef struct {
     operator_PRECISION_struct op;
     vector_PRECISION buf1, buf2, buf3, buf4, buf5;

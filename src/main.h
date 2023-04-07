@@ -318,6 +318,9 @@
     profiling_float_struct prof_float;
     profiling_double_struct prof_double;
     
+    //hutchinson
+    hutchinson_float_struct h_float;
+    hutchinson_double_struct h_double;
     // communication
     MPI_Request *reqs;
     int parent_rank, idle, neighbor_rank[8], num_processes, num_processes_dir[4];
@@ -620,6 +623,11 @@
 #include "var_table.h"
 #include "main_post_def_float.h"
 #include "main_post_def_double.h"
+
+//#include "powerit_double.h"
+#include "hutchinson_float.h"
+#include "hutchinson_double.h"
+
 #ifdef HAVE_LIME
 #include <lime.h>
 #include <lime_config.h>
