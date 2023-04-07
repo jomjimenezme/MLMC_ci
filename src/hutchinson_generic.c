@@ -131,7 +131,110 @@
   }
 
 
+  gmres_PRECISION_struct* get_p_struct_PRECISION( level_struct* l ){
+
+    if( l->depth==0 ){
+      return &(g.p);
+    }
+    else{
+      return &(l->p_PRECISION);
+    }
+  }
+
+  int apply_solver_PRECISION( level_struct* l, struct Thread *threading ){
+
+    int nr_iters;
+    double buff1, buff2;
+
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+    
+    buff1 = p->tol;
+    p->tol = g.tol;
+    START_MASTER(threading);
+    if( l->level==0 ){
+      buff2 = g.coarse_tol;
+      g.coarse_tol = g.tol;
+    }
+    END_MASTER(threading);
+    SYNC_MASTER_TO_ALL(threading);
+
+    nr_iters = fgmres_PRECISION( p, l, threading );
+    
+    START_MASTER(threading);
+    p->tol = buff1;
+    if( l->level==0 ){
+      g.coarse_tol = buff2;
+    }
+    END_MASTER(threading);
+    SYNC_MASTER_TO_ALL(threading);
+
+    return nr_iters;
+  }
+
+
+  complex_PRECISION hutchinson_plain_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
   
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+
+      vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+    }
+    double t0 = MPI_Wtime();
+    {
+      apply_solver_PRECISION( l, threading );
+    }
+    double t1 = MPI_Wtime();
+    START_MASTER(threading);
+      if(g.my_rank==0) printf( "Plain Solve Time:\t%f\n", t1-t0);
+    END_MASTER(threading);
+    // subtract the results and perform dot product
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      return global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
+    }
+  }
+
+
+  complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
+    
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "Trace computation via Hutchinson's method ...\n" );
+    END_MASTER(thrading);
+    
+    int i;
+    complex_PRECISION trace = 0.0;
+    struct sample estimate;
+    hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
+    level_struct* lx;
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\tfinest (and only) level ...\n" );
+    END_MASTER(thrading);
+
+    lx = l;
+    // set the pointer to the finest-level Hutchinson estimator
+    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+    
+    double t_plain = MPI_Wtime();
+    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    trace += estimate.acc_trace/estimate.sample_size;
+    double t_plain1 = MPI_Wtime();
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    if(g.my_rank==0)  printf( "Average solve time %f \n", (t_plain1-t_plain)/h->max_iters );
+    END_MASTER(thrading);
+
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "... done\n" );
+    END_MASTER(thrading);
+
+    return trace;
+  }
+
+
 
 
   // -------------------------------------------------------------------
