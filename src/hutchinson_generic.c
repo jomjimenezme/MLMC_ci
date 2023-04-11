@@ -162,9 +162,13 @@
     }
     END_MASTER(threading);
     SYNC_MASTER_TO_ALL(threading);
-
+double t0 = MPI_Wtime();
     nr_iters = fgmres_PRECISION( p, l, threading );
-    
+double t1 = MPI_Wtime();
+    if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
+	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d,\t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, p->tol, g.coarse_tol);
+    if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
+
     START_MASTER(threading);
     p->tol = buff1;
     if( l->level==0 ){
