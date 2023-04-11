@@ -161,7 +161,7 @@ int main( int argc, char **argv ) {
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
     struct Thread *threadingx = &threading;  
-    l.h_double.max_iters = 100;
+    l.h_double.max_iters = 1000;
     l.h_double.min_iters = 5;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
@@ -197,9 +197,20 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
     fflush(0);
     
+    START_MASTER(threadingx)
+    if(g.my_rank==0) 
+      printf("\n-----\nResulting trace from MLMC  = %f+i%f \n-----\n", CSPLIT(trace));
+    END_MASTER(threadingx)
+
+    SYNC_MASTER_TO_ALL(threadingx)
+
+
+
+  trace = split_mlmc_hutchinson_driver_double( &l, &threading );
+
    START_MASTER(threadingx)
     if(g.my_rank==0) 
-      printf("Resulting trace MLMC = %f+i%f\n\n", CSPLIT(trace));
+      printf("\n-----\nResulting trace from SPLIT  = %f+i%f \n-----\n", CSPLIT(trace));
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)

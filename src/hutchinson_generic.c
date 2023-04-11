@@ -303,9 +303,7 @@
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
       vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
 
-      if(l->depth ==0 && 1==0){
-        hutchinson_deflate_vector_PRECISION(h->rademacher_vector, l, threading);
-      }
+      //Deflate here?
       return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );   
     }
   }
@@ -360,6 +358,148 @@
     return trace;
   }
 
+
+ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "Trace computation via split levels ...\n" );
+    END_MASTER(thrading);
+
+    int i;
+    complex_PRECISION trace = 0.0;
+    struct sample estimate;
+    hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
+    level_struct* lx;
+    
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\tfull-rank difference levels ...\n" );
+    END_MASTER(thrading);
+    
+    // for all but coarsest level
+    lx = l;
+    for( i=0; i<g.num_levels-1;i++ ){  
+      // set the pointer to the split intermediate operator
+      h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
+      estimate = hutchinson_blind_PRECISION( lx, h, 1, threading );
+      trace += estimate.acc_trace/estimate.sample_size;
+      lx = lx->next_level;    
+    }
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    END_MASTER(thrading);
+
+    START_MASTER(threading);
+    if(g.my_rank==0) printf( "\torthogonalized difference levels ...\n" );
+    END_MASTER(thrading);
+    
+    // for all but coarsest level
+    lx = l;
+    for( i=0; i<g.num_levels-1;i++ ){      
+      // set the pointer to the split orthogonal operator
+      h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
+      estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+      trace += estimate.acc_trace/estimate.sample_size;
+      lx = lx->next_level; 
+    }
+    
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    END_MASTER(thrading);
+
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
+    END_MASTER(thrading);
+
+    // coarsest level
+    // set the pointer to the coarsest-level Hutchinson estimator
+    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    trace += estimate.acc_trace/estimate.sample_size;
+
+    START_MASTER(threading);
+    if(g.my_rank==0)  printf( "\t... done\n" );
+    END_MASTER(thrading);
+
+    return trace;
+  }
+
+
+  // the term tr( (I - P_{l} P_{l}^{H}) A_{l}^{-1} )
+  complex_PRECISION hutchinson_split_orthogonal_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+
+    // 1. project
+    // 2. invert
+
+    // FIRST TERM
+
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+
+      apply_R_PRECISION( h->mlmc_b2, h->rademacher_vector, l, threading );
+      apply_P_PRECISION( h->mlmc_b1, h->mlmc_b2, l, threading );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      vector_PRECISION_minus( h->mlmc_b1, h->rademacher_vector, h->mlmc_b1, start, end, l );
+
+      vector_PRECISION_copy( p->b, h->mlmc_b1, start, end, l );
+    }
+    
+    // SECOND TERM
+
+    {
+      apply_solver_PRECISION( l, threading );
+    }
+
+    // subtract the results and perform dot product
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      return global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );   
+    }
+  }
+
+
+
+ // the term tr( R A_{l}^{-1} P - A_{l+1}^{-1} )
+  complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+
+    // FIRST TERM : result stored in h->mlmc_b1
+
+    // 1. prolongate
+    // 2. invert
+    // 3. restrict
+    {
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+
+      apply_P_PRECISION( p->b, h->rademacher_vector, l, threading );
+      // the input of this solve is p->x, the output p->b
+      apply_solver_PRECISION( l, threading );
+      apply_R_PRECISION( h->mlmc_b1, p->x, l, threading );
+    }
+
+    // SECOND TERM : result stored in h->mlmc_b2
+
+    // apply A_{l+1}^{-1}
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l->next_level );
+      compute_core_start_end( 0, l->next_level->inner_vector_size, &start, &end, l->next_level, threading );
+      vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l->next_level );
+      // solution of this solve is in l->next_level->p_PRECISION.x
+      apply_solver_PRECISION( l->next_level, threading );
+      vector_PRECISION_copy( h->mlmc_b2, l->next_level->p_PRECISION.x, start, end, l->next_level );
+    }
+
+    // subtract the results and perform dot product
+    {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l->next_level );
+      compute_core_start_end( 0, l->next_level->inner_vector_size, &start, &end, l->next_level, threading );
+      vector_PRECISION_minus( h->mlmc_b1, h->mlmc_b1, h->mlmc_b2, start, end, l->next_level ); // compute r = b - w
+      return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );   
+    }
+  }
+  
 
 
   // -------------------------------------------------------------------
