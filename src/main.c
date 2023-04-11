@@ -188,6 +188,143 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      // calling the coarsest-level solver once on setup
+//#if defined(GCRODR) || defined(POLYPREC) || defined(BLOCK_JACOBI)
+#if defined(GCRODR)
+      {
+        level_struct *lx = &l;
+
+        START_MASTER(threadingx)
+        printf0( "\nPre-constructing coarsest-level data ...\n" );
+        END_MASTER(threadingx)
+
+        while (1) {
+          if ( lx->level==0 ) {
+
+            if ( !(lx->idle) ) {
+
+            if ( g.mixed_precision==0 ) {
+
+              gmres_double_struct* px = &(lx->p_double);
+
+              // set RHS to random
+              START_MASTER(threadingx)
+              vector_double_define_random( px->b, px->v_start, px->v_end, lx );
+              END_MASTER(threadingx)
+
+              START_MASTER(threadingx)
+              g.gcrodr_calling_from_setup = 1;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+              double buff1x = px->tol;
+              double buff2x = g.coarse_tol;
+              START_MASTER(threadingx)
+              px->tol = 1.0e-20;
+              g.coarse_tol = 1.0e-20;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+              // call the coarsest-level solver
+              while ( px->gcrodr_double.CU_usable==0 ) {
+                coarse_solve_odd_even_double( px, &(lx->oe_op_double), lx, threadingx );
+              }
+              START_MASTER(threadingx)
+              px->tol = buff1x;
+              g.coarse_tol = buff2x;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+              START_MASTER(threadingx)
+              g.gcrodr_calling_from_setup = 0;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+            }
+            else {
+
+              gmres_float_struct* px = &(lx->p_float);
+
+              // set RHS to random
+              START_MASTER(threadingx)
+              vector_float_define_random( px->b, px->v_start, px->v_end, lx );
+              END_MASTER(threadingx)
+
+              START_MASTER(threadingx)
+              g.gcrodr_calling_from_setup = 1;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+              double buff1x = px->tol;
+              double buff2x = g.coarse_tol;
+              START_MASTER(threadingx)
+              px->tol = 1.0e-20;
+              g.coarse_tol = 1.0e-20;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+              // call the coarsest-level solver
+              while ( px->gcrodr_float.CU_usable==0 ) {
+                coarse_solve_odd_even_float( px, &(lx->oe_op_float), lx, threadingx );
+              }
+              START_MASTER(threadingx)
+              px->tol = buff1x;
+              g.coarse_tol = buff2x;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+              START_MASTER(threadingx)
+              g.gcrodr_calling_from_setup = 0;
+              END_MASTER(threadingx)
+              SYNC_MASTER_TO_ALL(threadingx)
+
+            }
+
+            } // end of !idle if
+
+            break;
+          }
+          else { lx = lx->next_level; }
+        }
+
+        START_MASTER(threadingx)
+        printf0( "... done\n\n" );
+        END_MASTER(threadingx)
+
+      }
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     double t_mlmc0, t_mlmc1;
     t_mlmc0 = MPI_Wtime();
     trace = mlmc_hutchinson_driver_double( &l, &threading );
