@@ -198,6 +198,70 @@ int main( int argc, char **argv ) {
 
 
 
+#ifdef POLYPREC
+      {
+        // setting flag to re-update lejas
+        level_struct *lx = &l;
+        while (1) {
+          if ( lx->level==0 ) {
+            if ( g.mixed_precision==0 ) {
+              lx->p_double.polyprec_double.update_lejas = 1;
+              lx->p_double.polyprec_double.preconditioner = NULL;
+            }
+            else {
+              lx->p_float.polyprec_float.update_lejas = 1;
+              lx->p_float.polyprec_float.preconditioner = NULL;
+            }
+            break;
+          }
+          else { lx = lx->next_level; }
+        }
+      }
+#endif
+
+#ifdef BLOCK_JACOBI
+      {
+        // setting flag to re-update lejas
+        level_struct *lx = &l;
+        while (1) {
+          if ( lx->level==0 ) {
+            if ( g.mixed_precision==0 ) {
+              lx->p_double.block_jacobi_double.local_p.polyprec_double.update_lejas = 1;
+              lx->p_double.block_jacobi_double.BJ_usable = 0;
+            }
+            else {
+              lx->p_float.block_jacobi_float.local_p.polyprec_float.update_lejas = 1;
+              lx->p_float.block_jacobi_float.BJ_usable = 0;
+            }
+            break;
+          }
+          else { lx = lx->next_level; }
+        }
+      }
+#endif
+
+#ifdef GCRODR
+      {
+        // setting flag to re-update recycling subspace
+        level_struct *lx = &l;
+        while (1) {
+          if ( lx->level==0 ) {
+            if ( g.mixed_precision==0 ) {
+              //lx->p_double.gcrodr_double.CU_usable = 0;
+              lx->p_double.gcrodr_double.update_CU = 1;
+              lx->p_double.gcrodr_double.upd_ctr = 0;
+            }
+            else {
+              //lx->p_float.gcrodr_float.CU_usable = 0;
+              lx->p_float.gcrodr_float.update_CU = 1;
+              lx->p_float.gcrodr_float.upd_ctr = 0;
+            }
+            break;
+          }
+          else { lx = lx->next_level; }
+        }
+      }
+#endif
 
 
 
