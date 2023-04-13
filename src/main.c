@@ -159,42 +159,14 @@ int main( int argc, char **argv ) {
     }
 #endif
 
-//TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
+
+
+
+
+
+
+
     struct Thread *threadingx = &threading;  
-    l.h_double.max_iters = 1;
-    l.h_double.min_iters = 1;
-    l.h_double.trace_tol = 1.0e-4;
-    hutchinson_diver_double_init( &l, &threading );  
-    hutchinson_diver_double_alloc( &l, &threading );
-
-    complex_double trace;
-
-    //TODO: Is this the right way to distribute work? (code + algorithm)
-    hutchinson_double_struct* h = &(l.h_double);
-    h->tol_per_level = malloc(sizeof(double)*l.depth);
-    h->tol_per_level[0] = sqrt(0.75);
-    h->tol_per_level[1] = sqrt(0.20);
-    h->tol_per_level[2] = sqrt(0.05);
-
-    g.on_solve = 1;
-    //solve_driver( &l, &threading );
-
-
-   /* trace = hutchinson_driver_double( &l, &threading );
-
-    START_MASTER(threadingx)
-    if(g.my_rank==0) 
-      printf("\n-----\nResulting trace from PLAIN  = %f+i%f \n-----\n", CSPLIT(trace));
-    END_MASTER(threadingx)
-*/
-
-
-
-
-
-
-
-
 
 
 
@@ -384,12 +356,39 @@ int main( int argc, char **argv ) {
 
 
 
+//TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
+    l.h_double.max_iters = 1000;
+    l.h_double.min_iters = 1000;
+    l.h_double.trace_tol = 1.0e-4;
+    hutchinson_diver_double_init( &l, &threading );  
+    hutchinson_diver_double_alloc( &l, &threading );
+
+    complex_double trace;
+
+    //TODO: Is this the right way to distribute work? (code + algorithm)
+    hutchinson_double_struct* h = &(l.h_double);
+    h->tol_per_level = malloc(sizeof(double)*l.depth);
+    h->tol_per_level[0] = sqrt(0.75);
+    h->tol_per_level[1] = sqrt(0.20);
+    h->tol_per_level[2] = sqrt(0.05);
+
+    g.on_solve = 1;
+    //solve_driver( &l, &threading );
+
+
+    trace = hutchinson_driver_double( &l, &threading );
+
+    START_MASTER(threadingx)
+    if(g.my_rank==0) 
+      printf("\n-----\nResulting trace from PLAIN  = %f+i%f \n-----\n", CSPLIT(trace));
+    END_MASTER(threadingx)
 
 
 
 
 
-    double t_mlmc0, t_mlmc1;
+
+   /* double t_mlmc0, t_mlmc1;
     t_mlmc0 = MPI_Wtime();
     trace = mlmc_hutchinson_driver_double( &l, &threading );
     t_mlmc1 =MPI_Wtime();
@@ -404,9 +403,9 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)
+*/
 
 /*
-
   trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)

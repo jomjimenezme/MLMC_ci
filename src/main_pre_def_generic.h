@@ -224,6 +224,7 @@ typedef struct {
     
     vector_PRECISION mlmc_b1;
     vector_PRECISION mlmc_b2;
+    vector_PRECISION mlmc_testing;
 
     // to store the Rademacher vector    
     vector_PRECISION rademacher_vector;

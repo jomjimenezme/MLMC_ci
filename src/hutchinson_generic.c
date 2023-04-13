@@ -26,6 +26,9 @@
         h->mlmc_b1 = NULL;
         
         h->mlmc_b2 =NULL;
+
+        h->mlmc_testing =NULL;
+
         
         h->rademacher_vector =NULL;
         
@@ -37,6 +40,8 @@
         //For MLMC
         PUBLIC_MALLOC( h->mlmc_b1, complex_PRECISION, l->inner_vector_size );
         PUBLIC_MALLOC( h->mlmc_b2, complex_PRECISION, l->inner_vector_size );
+        PUBLIC_MALLOC( h->mlmc_testing, complex_PRECISION, l->inner_vector_size );
+        
         
         PUBLIC_MALLOC( h->rademacher_vector, complex_PRECISION, l->inner_vector_size );
         
@@ -47,6 +52,7 @@
         
         PUBLIC_FREE( h->mlmc_b1, complex_PRECISION, l->inner_vector_size );   
         PUBLIC_FREE( h->mlmc_b2, complex_PRECISION, l->inner_vector_size );   
+        PUBLIC_FREE( h->mlmc_testing, complex_PRECISION, l->inner_vector_size );
         PUBLIC_FREE( h->rademacher_vector, complex_PRECISION, l->inner_vector_size );   
     }
     
@@ -162,11 +168,20 @@
     }
     END_MASTER(threading);
     SYNC_MASTER_TO_ALL(threading);
-double t0 = MPI_Wtime();
+    
+    double t0 = MPI_Wtime();
     nr_iters = fgmres_PRECISION( p, l, threading );
-double t1 = MPI_Wtime();
+    double t1 = MPI_Wtime();
+
+    int start, end;
+    compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
+    apply_operator_PRECISION( p->w, p->x, p, l, threading ); // compute w = D*x
+    vector_PRECISION_minus( p->r, p->b, p->w, start, end, l ); // compute r = b - w
+    double norm = global_norm_PRECISION( p->r, p->v_start, p->v_end, l, threading ); //||r||
+    double relative = norm/global_norm_PRECISION( p->b, p->v_start, p->v_end, l, threading );//||r||/b
+
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
-	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d,\t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, p->tol, g.coarse_tol);
+	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d, \t ||r||= %e, \t ||r||/||b|| = %e, \t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, norm, relative, p->tol, g.coarse_tol);
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
 
     START_MASTER(threading);
@@ -427,7 +442,7 @@ double t1 = MPI_Wtime();
   }
 
 
-  // the term tr( (I - P_{l} P_{l}^{H}) A_{l}^{-1} )
+  // the term tr( A_{l}^{-1}(I - P_{l} P_{l}^{H})  )
   complex_PRECISION hutchinson_split_orthogonal_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
 
     // 1. project
@@ -447,13 +462,13 @@ double t1 = MPI_Wtime();
       vector_PRECISION_copy( p->b, h->mlmc_b1, start, end, l );
     }
     
-    // SECOND TERM
+    // SECOND "factor"
 
     {
       apply_solver_PRECISION( l, threading );
     }
 
-    // subtract the results and perform dot product
+    // perform dot product
     {
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
