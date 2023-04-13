@@ -1,0 +1,1211 @@
+
++- subspace correction methods for QCD applications -+
+|                                                    |
+|  Use option >> -? << for help                      |
+|                                                    |
++----------------------------------------------------+
+
+
+Number of Processes: 16
+Program is being started...
+
+
+
++----------------------------------------------------------+
+| The DDalphaAMG solver library.                           |
+| Copyright (C) 2016, Matthias Rottmann, Artur Strebel,    |
+|       Simon Heybrock, Simone Bacchio, Bjoern Leder.      |
+|                                                          |
+| This program comes with ABSOLUTELY NO WARRANTY.          |
++----------------------------------------------------------+
+
+configuration: conf/qcdsf.632.01000.mg2
+
+Desired average plaquette: 1.6479691428981 in [0,3]
+BASIS0:OPENQCD/DD-HMC BASIS
+periodic in time boundary conditions
+Configuration stored...
+average plaquette: 1.6479691428981
+
++----------------------------------------------------------+
+| read in and set up the parallel dirac operator           |
+| elapsed wall clock time: 2.14508      seconds            |
++----------------------------------------------------------+
+initial definition --- depth: 0
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+depth: 0, time spent for setting up next coarser operator: 35.004257 seconds
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+initial definition --- depth: 1
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+depth: 1, time spent for setting up next coarser operator: 0.977900 seconds
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+initial definition --- depth: 2
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+depth: 2, time spent for setting up next coarser operator: 0.062210 seconds
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+malloc of "op->odd_proj" failed: pointer is not NULL (build/gsrc/operator_double.c:128).
+
+initial coarse grid correction is defined
+elapsed time: 117.518784 seconds
+
++----------------------------------------------------------+
+| 4-level method                                           |
+| postsmoothing K-cycle                                    |
+| FGMRES + red-black multiplicative Schwarz                |
+|          restart length: 10                              |
+|                      m0: -0.335450                       |
+|                     csw: +1.919200                       |
++----------------------------------------------------------+
+|   preconditioner cycles: 1                               |
+|            inner solver: minimal residual iteration      |
+|               precision: double                          |
++---------------------- depth  0 --------------------------+
+|          global lattice: 64  32  32  32                  |
+|           local lattice: 16  16  16  32                  |
+|           block lattice: 4   4   4   4                   |
+|        post smooth iter: 3                               |
+|     smoother inner iter: 4                               |
+|              setup iter: 5                               |
+|            test vectors: 24                              |
++---------------------- depth  1 --------------------------+
+|          global lattice: 16  8   8   8                   |
+|           local lattice: 4   4   4   8                   |
+|           block lattice: 2   2   2   2                   |
+|        post smooth iter: 3                               |
+|     smoother inner iter: 4                               |
+|              setup iter: 4                               |
+|            test vectors: 28                              |
++---------------------- depth  2 --------------------------+
+|          global lattice: 8   4   4   4                   |
+|           local lattice: 2   2   2   4                   |
+|           block lattice: 2   2   2   2                   |
+|        post smooth iter: 3                               |
+|     smoother inner iter: 4                               |
+|              setup iter: 4                               |
+|            test vectors: 28                              |
++---------------------- depth  3 --------------------------+
+|          global lattice: 4   2   2   2                   |
+|           local lattice: 1   1   1   2                   |
+|           block lattice: 1   1   1   1                   |
+|      coarge grid solver: odd even GMRES                  |
+|              iterations: 50                              |
+|                  cycles: 20                              |
+|               tolerance: 1e-01                           |
++----------------------------------------------------------+
+|          K-cycle length: 5                               |
+|        K-cycle restarts: 2                               |
+|       K-cycle tolerance: 1e-01                           |
++----------------------------------------------------------+
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   3                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.21e-01(     24) |
+|      2 flop vector operations, double: 6.55e-01(    168) |
+|      8 flop vector operations, double: 1.35e+00(    576) |
+|               copy operations, double: 4.31e+00(    817) |
+|          set value operations, double: 3.88e+00( 442536) |
+| interpolation and restriction, double: 2.24e+00(     24) |
+|                 self coupling, double: 5.97e+00( 294912) |
+|                      smoother, double: 6.29e+01(    144) |
+|            operator comm init, double: 4.50e-03(   1296) |
+|            operator comm wait, double: 1.04e+00(   1296) |
+|                    allreduces, double: 6.10e-03(     24) |
+|    Gram-Schmidt on aggregates, double: 1.82e+00(      1) |
+|     smoother - pt 3, res comm, double: 4.13e+00(  73728) |
+|   smoother - pt 4, solve comm, double: 5.49e+01(  73728) |
++----------------------------------------------------------+
+| depth:   1 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 3.11e-03(     28) |
+|      2 flop vector operations, double: 9.43e-03(    196) |
+|      8 flop vector operations, double: 6.56e-02(   1344) |
+|               copy operations, double: 9.54e-02(   1072) |
+|          set value operations, double: 9.16e-02(  34528) |
+| interpolation and restriction, double: 4.56e-02(     28) |
+|                      smoother, double: 9.18e+00(    168) |
+|            operator comm init, double: 2.71e-03(   1512) |
+|            operator comm wait, double: 1.95e-01(   1512) |
+|                    allreduces, double: 8.68e-04(     28) |
+|    Gram-Schmidt on aggregates, double: 2.59e-02(      1) |
+|     smoother - pt 3, res comm, double: 1.37e+00(   5376) |
+|   smoother - pt 4, solve comm, double: 7.56e+00(   5376) |
++----------------------------------------------------------+
+| depth:   2 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 2.48e-04(     28) |
+|      2 flop vector operations, double: 5.41e-04(    196) |
+|      8 flop vector operations, double: 3.58e-03(   1344) |
+|               copy operations, double: 9.95e-03(   1456) |
+|          set value operations, double: 5.81e-03(   2604) |
+|                      smoother, double: 7.67e-01(    168) |
+|            operator comm init, double: 1.08e-03(   1512) |
+|            operator comm wait, double: 2.03e-02(   1512) |
+|                    allreduces, double: 1.40e-04(     28) |
+|    Gram-Schmidt on aggregates, double: 1.86e-03(      1) |
+|     smoother - pt 3, res comm, double: 1.16e-01(    336) |
+|   smoother - pt 4, solve comm, double: 6.25e-01(    336) |
++----------------------------------------------------------+
+| depth:   3 / level:   0                time    ( count ) |
++----------------------------------------------------------+
++----------------------------------------------------------+
+| flop/lattice site:  1.65e+08                             |
+| flop/s/MPIprocess:  1.84e+11                             |
++----------------------------------------------------------+
+
+depth: 0, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000011+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000014+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000021+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000012+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000013+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000016+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000016+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000013+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000024+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000022+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000013+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000011+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000016+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000019+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000013+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000023+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000021+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000020+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000016+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000012+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000012+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000013+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000014+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000022+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000014+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000020+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000012+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000017+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000014+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+depth: 0, time spent for setting up next coarser operator: 34.933466 seconds
+depth: 1, time spent for setting up next coarser operator: 1.000402 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065578 seconds
+depth: 1, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.009291+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004758+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.003240+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.002429+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.002033+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001715+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001661+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001513+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001436+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001457+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001323+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001382+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001410+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001453+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001255+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001190+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001143+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001116+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001297+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001187+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001209+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001247+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001299+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001156+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001193+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001278+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001202+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.001227+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.972774 seconds
+depth: 2, time spent for setting up next coarser operator: 0.064794 seconds
+depth: 2, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000043+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000043+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000018+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000014+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000012+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000009+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000009+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000009+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000007+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000009+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000009+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000007+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000008+0.000000i
+depth: 2, time spent for setting up next coarser operator: 0.061605 seconds
+depth: 0, bootstrap step number 2...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001062+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000765+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000564+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000609+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000504+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000533+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000771+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000512+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000579+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000474+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000401+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000403+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000598+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000671+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000446+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000688+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000569+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000739+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000728+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000413+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000535+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000653+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000522+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000681+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000701+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000491+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000902+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000600+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000630+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000541+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000461+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000936+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000735+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000631+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000540+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000631+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000492+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000487+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000453+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000661+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000786+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000649+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000545+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000488+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000528+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000571+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000498+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000381+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000533+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000499+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000595+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000482+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000493+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000704+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000492+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000471+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000512+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000493+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000581+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000541+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000570+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000498+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000528+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000557+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000658+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000844+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000540+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000463+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000511+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000502+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000700+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000594+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000529+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000634+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000551+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000442+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000642+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000425+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000452+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000637+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000513+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000471+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000410+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000528+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000417+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000407+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000758+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000428+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000531+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000499+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000715+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000519+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000630+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000444+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000586+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000556+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001039+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000737+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000561+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000688+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000531+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000496+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000748+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000638+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000429+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000406+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000565+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000391+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000865+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000376+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000687+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000441+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000464+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000480+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000735+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000514+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000412+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000542+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000492+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000409+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000813+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000534+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000540+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000662+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000612+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000670+0.000000i
+depth: 0, time spent for setting up next coarser operator: 34.940689 seconds
+depth: 1, time spent for setting up next coarser operator: 0.999561 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065827 seconds
+depth: 1, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.008916+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.008505+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.007104+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005716+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.006334+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.006177+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005116+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.006043+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005791+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005024+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005115+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.006477+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005189+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005572+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005342+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005745+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005313+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005010+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004869+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005079+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.005535+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.006082+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004701+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004216+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004065+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.004727+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000000+0.000000i
+from fgmres : depth: 2, iter: 1, p->H(1,0) = +0.003903+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.974768 seconds
+depth: 2, time spent for setting up next coarser operator: 0.064950 seconds
+depth: 1, bootstrap step number 2...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000469+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000261+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000275+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000305+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000250+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000250+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000275+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000276+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000321+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000474+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000447+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000347+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000327+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000278+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000359+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000254+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000252+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000331+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000263+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000313+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000327+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000307+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000240+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000343+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000271+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000350+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000273+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000237+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000297+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000288+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000206+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000284+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000289+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000244+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000219+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000254+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000253+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000357+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000423+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000385+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000451+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000371+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000248+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000284+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000495+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000205+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000293+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000409+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000280+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000243+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000347+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000335+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000276+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000289+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000269+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000341+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000303+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000352+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000236+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000366+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000206+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000245+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000288+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000256+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000328+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000342+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000197+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000230+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000295+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000181+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000369+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000273+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000260+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000309+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000284+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000209+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000264+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000335+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000315+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000312+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000251+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000175+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000297+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000381+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.973264 seconds
+depth: 2, time spent for setting up next coarser operator: 0.066169 seconds
+depth: 2, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003050+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001085+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000961+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001220+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000753+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000874+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001349+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000824+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001133+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000747+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001006+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001023+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000922+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001036+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001082+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000830+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000945+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000828+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001106+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000782+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000716+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001144+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001086+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000670+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000800+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000806+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000778+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000759+0.000000i
+depth: 2, time spent for setting up next coarser operator: 0.062023 seconds
+depth: 2, bootstrap step number 2...
+depth: 2, time spent for setting up next coarser operator: 0.062047 seconds
+depth: 0, bootstrap step number 3...
+depth: 0, time spent for setting up next coarser operator: 34.975834 seconds
+depth: 1, time spent for setting up next coarser operator: 1.004205 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065291 seconds
+depth: 1, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000002+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000002+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000001+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.974909 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065126 seconds
+depth: 1, bootstrap step number 2...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005706+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002146+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003615+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006081+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003552+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006003+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006226+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003941+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005680+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003442+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004641+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003466+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004315+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006058+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004701+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003588+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003899+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003490+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003754+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004038+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004424+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001730+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003380+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004126+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002711+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004879+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006173+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004190+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006500+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004726+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004104+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006590+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003608+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005341+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004046+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003959+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003109+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004235+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005845+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003312+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002808+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002068+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003126+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005066+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004758+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004511+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004107+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004360+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003231+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004975+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.007123+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003735+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003480+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003553+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002300+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002394+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003220+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002296+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002419+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002220+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002835+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003641+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001848+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002780+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004948+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004789+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003183+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003306+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003108+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002805+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003034+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003065+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002764+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001927+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003859+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003959+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004032+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004512+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002708+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004831+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.005068+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004549+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.007236+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003854+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002166+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002836+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004271+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003618+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003601+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003304+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003265+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004022+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003068+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003215+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002978+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003743+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002908+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002948+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003904+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002867+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003070+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002468+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003091+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004742+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002761+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002873+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004602+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006070+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004057+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.006755+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003313+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002545+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003529+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004725+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003625+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003353+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002945+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004080+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003494+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002537+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004015+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004359+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001832+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002292+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004055+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004441+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002781+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002192+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002899+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002581+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003206+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002348+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002158+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003447+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002436+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004884+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001777+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001786+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002136+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003190+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002683+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003320+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002789+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002047+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002667+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003323+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001907+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002102+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002593+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002497+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003630+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002004+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.001863+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002822+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.002482+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.975146 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065480 seconds
+depth: 2, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008413+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004860+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009543+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003437+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009698+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008527+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009495+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004963+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.004965+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009897+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.003749+0.000000i
+depth: 2, time spent for setting up next coarser operator: 0.062491 seconds
+depth: 2, bootstrap step number 2...
+depth: 2, time spent for setting up next coarser operator: 0.061795 seconds
+depth: 0, bootstrap step number 4...
+depth: 0, time spent for setting up next coarser operator: 34.929009 seconds
+depth: 1, time spent for setting up next coarser operator: 0.999400 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065712 seconds
+depth: 1, bootstrap step number 1...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000185+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000181+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000199+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000159+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000210+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000146+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000200+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000160+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000139+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000196+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000130+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000173+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000106+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000176+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000144+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000210+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000091+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000137+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000139+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000214+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000107+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000160+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000107+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000173+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000111+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000212+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000097+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000186+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000111+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000198+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000137+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000205+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000089+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000128+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000143+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000210+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000089+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000156+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000098+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000145+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000106+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000207+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000131+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000186+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000083+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000129+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000071+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000136+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000125+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000204+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000106+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000182+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000076+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000165+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000093+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000175+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000092+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.000185+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.974527 seconds
+depth: 2, time spent for setting up next coarser operator: 0.064671 seconds
+depth: 1, bootstrap step number 2...
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009350+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009164+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008874+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009593+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009389+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008116+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008975+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009270+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008553+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.007334+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008936+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008209+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008868+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009220+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008886+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009504+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009026+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009477+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008455+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009768+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009208+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.007684+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008282+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.008807+0.000000i
+from fgmres : depth: 3, iter: 1, p->H(1,0) = +0.009477+0.000000i
+depth: 1, time spent for setting up next coarser operator: 0.972840 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065676 seconds
+depth: 1, bootstrap step number 3...
+depth: 1, time spent for setting up next coarser operator: 0.973116 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065390 seconds
+depth: 2, bootstrap step number 1...
+depth: 2, time spent for setting up next coarser operator: 0.061782 seconds
+depth: 2, bootstrap step number 2...
+depth: 2, time spent for setting up next coarser operator: 0.062167 seconds
+depth: 2, bootstrap step number 3...
+depth: 2, time spent for setting up next coarser operator: 0.062669 seconds
+depth: 0, bootstrap step number 5...
+depth: 0, time spent for setting up next coarser operator: 34.936988 seconds
+depth: 1, time spent for setting up next coarser operator: 1.000033 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065975 seconds
+depth: 1, bootstrap step number 1...
+depth: 1, time spent for setting up next coarser operator: 0.972474 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065255 seconds
+depth: 1, bootstrap step number 2...
+depth: 1, time spent for setting up next coarser operator: 0.972398 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065196 seconds
+depth: 1, bootstrap step number 3...
+depth: 1, time spent for setting up next coarser operator: 0.971256 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065818 seconds
+depth: 1, bootstrap step number 4...
+depth: 1, time spent for setting up next coarser operator: 0.972158 seconds
+depth: 2, time spent for setting up next coarser operator: 0.065193 seconds
+depth: 2, bootstrap step number 1...
+depth: 2, time spent for setting up next coarser operator: 0.062210 seconds
+depth: 2, bootstrap step number 2...
+depth: 2, time spent for setting up next coarser operator: 0.061848 seconds
+depth: 2, bootstrap step number 3...
+depth: 2, time spent for setting up next coarser operator: 0.062801 seconds
+depth: 2, bootstrap step number 4...
+depth: 2, time spent for setting up next coarser operator: 0.061933 seconds
+
+performed 5 iterative setup steps
+elapsed time: 817.079164 seconds (278.894901 seconds on coarse grid)
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   3                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.13e+00(    240) |
+|         process inner product, double: 9.32e+00(    120) |
+|      2 flop vector operations, double: 3.95e+00(    720) |
+|      8 flop vector operations, double: 1.82e+01(   2820) |
+|       other vector operations, double: 2.58e+01(      5) |
+|               copy operations, double: 7.67e+00(   1800) |
+|          set value operations, double: 2.00e+00(1105920) |
+| interpolation and restriction, double: 2.35e+01(    240) |
+|                 self coupling, double: 1.74e+01( 798720) |
+|                      smoother, double: 1.68e+02(    360) |
+|            operator comm init, double: 1.47e-02(   4320) |
+|            operator comm wait, double: 3.81e+00(   4320) |
+|                    allreduces, double: 3.37e-01(    355) |
+|    Gram-Schmidt on aggregates, double: 9.08e+00(      5) |
+|     smoother - pt 3, res comm, double: 2.43e+01( 184320) |
+|   smoother - pt 4, solve comm, double: 1.35e+02( 184320) |
++----------------------------------------------------------+
+| depth:   1 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 2.84e-01(   1655) |
+|         process inner product, double: 3.95e-01(   1031) |
+|      2 flop vector operations, double: 4.05e-01(   5827) |
+|      6 flop vector operations, double: 1.30e-02(    120) |
+|      8 flop vector operations, double: 1.57e+00(  31746) |
+|       other vector operations, double: 5.76e-01(     12) |
+|               copy operations, double: 8.41e-01(  13377) |
+|          set value operations, double: 6.04e-01( 591810) |
+| interpolation and restriction, double: 3.73e+00(   2062) |
+|                 self coupling, double: 1.88e+00(    743) |
+|             neighbor coupling, double: 1.91e+01(    743) |
+|                      smoother, double: 1.90e+02(   3093) |
+|            operator comm init, double: 7.48e-02(  41574) |
+|            operator comm wait, double: 3.22e+00(  41574) |
+|                    allreduces, double: 5.46e-01(   2674) |
+|    Gram-Schmidt on aggregates, double: 8.75e-01(     34) |
+|     smoother - pt 3, res comm, double: 4.88e+01(  98976) |
+|   smoother - pt 4, solve comm, double: 1.38e+02(  98976) |
+|          Hessenberg: qr update double: 2.01e-04(  11346) |
+|         Hessenberg: bkwd subst double: 6.39e-05(   2586) |
++----------------------------------------------------------+
+| depth:   2 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 8.63e-01(   8578) |
+|         process inner product, double: 1.12e-01(   6310) |
+|      2 flop vector operations, double: 1.89e-01(  34263) |
+|      6 flop vector operations, double: 8.00e-03(   1031) |
+|      8 flop vector operations, double: 4.83e-01( 177503) |
+|       other vector operations, double: 3.75e-02(     12) |
+|               copy operations, double: 3.00e-01(  82677) |
+|          set value operations, double: 1.28e-01( 109181) |
+| interpolation and restriction, double: 1.49e+00(  12620) |
+|                 self coupling, double: 1.23e+00(   6419) |
+|             neighbor coupling, double: 1.12e+01(   6419) |
+|                      smoother, double: 9.85e+01(  18930) |
+|            operator comm init, double: 1.78e-01( 265674) |
+|            operator comm wait, double: 3.17e+00( 265674) |
+|                    allreduces, double: 1.26e+00(  14876) |
+|    Gram-Schmidt on aggregates, double: 1.06e-01(     58) |
+|     smoother - pt 3, res comm, double: 2.46e+01(  37860) |
+|   smoother - pt 4, solve comm, double: 7.07e+01(  37860) |
+|          Hessenberg: qr update double: 1.02e-03(  99174) |
+|         Hessenberg: bkwd subst double: 4.26e-04(  22558) |
++----------------------------------------------------------+
+| depth:   3 / level:   0                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 8.33e-02(   3179) |
+|         process inner product, double: 4.80e-02(  20453) |
+|      2 flop vector operations, double: 3.93e-03(  23612) |
+|      6 flop vector operations, double: 1.84e-03(   3169) |
+|      8 flop vector operations, double: 1.54e-01( 583967) |
+|               copy operations, double: 1.14e-02(  43757) |
+|          set value operations, double: 4.01e-01(3659083) |
+|                 self coupling, double: 6.32e+00( 453097) |
+|             neighbor coupling, double: 5.28e+01( 453097) |
+|            operator comm init, double: 2.61e+00(5437164) |
+|            operator comm wait, double: 5.30e+00(5437164) |
+|                    allreduces, double: 4.70e-01(  47266) |
+|          Hessenberg: qr update double: 4.86e-03(1682226) |
+|         Hessenberg: bkwd subst double: 2.26e-03( 321926) |
++----------------------------------------------------------+
+| flop/lattice site:  4.59e+08                             |
+| flop/s/MPIprocess:  7.36e+10                             |
++----------------------------------------------------------+
+
+Trace computation via 'traditional' difference levels ...
+	difference levels ...
++----------------------------------------------------------+
+| approx. rel. res. after  1      iterations: 6.020048e-02 |
+| approx. rel. res. after  2      iterations: 1.570164e-02 |
+| approx. rel. res. after  3      iterations: 5.942495e-03 |
+| approx. rel. res. after  4      iterations: 1.644018e-03 |
+| approx. rel. res. after  5      iterations: 4.479830e-04 |
+| approx. rel. res. after  6      iterations: 1.262414e-04 |
+| approx. rel. res. after  7      iterations: 3.716551e-05 |
+| approx. rel. res. after  8      iterations: 1.155760e-05 |
+| approx. rel. res. after  9      iterations: 3.331281e-06 |
+| approx. rel. res. after  10     iterations: 9.981114e-07 |
+| approx. rel. res. after  11     iterations: 3.469208e-07 |
+| approx. rel. res. after  12     iterations: 9.659649e-08 |
+| approx. rel. res. after  13     iterations: 4.327830e-08 |
+| approx. rel. res. after  14     iterations: 1.202567e-08 |
+| approx. rel. res. after  15     iterations: 3.859976e-09 |
+| approx. rel. res. after  16     iterations: 1.193902e-09 |
+| approx. rel. res. after  17     iterations: 3.408583e-10 |
+| approx. rel. res. after  18     iterations: 1.152972e-10 |
+| approx. rel. res. after  19     iterations: 3.240019e-11 |
+| approx. rel. res. after  20     iterations: 9.215051e-12 |
++----------------------------------------------------------+
+
++----------------------------------------------------------+
+|       FGMRES iterations: 20     coarse average: 39.00    |
+| exact relative residual: ||r||/||b|| = 9.215051e-12      |
+| elapsed wall clock time: 48.9542  seconds                |
+|        coarse grid time: 11.4327  seconds (23.4%)        |
+|        coarsest grid time: 1.1359   seconds (02.3%)        |
+| coarsest grid matmul time: 0.0000   seconds (00.0%)        |
+|  consumed core minutes*: 1.31e+01 (solve only)           |
+|    max used mem/MPIproc: 4.65e+00 GB                     |
++----------------------------------------------------------+
+*: only correct if #MPIprocs*#threads == #CPUs
+
+
++----------------------------------------------------------+
+| solver profiling                                         |
++----------------------------------------------------------+
+| depth:   0 / level:   3                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.08e-01(     22) |
+|         process inner product, double: 7.12e-01(     20) |
+|      2 flop vector operations, double: 5.51e-01(    103) |
+|      6 flop vector operations, double: 1.10e-02(      1) |
+|      8 flop vector operations, double: 1.96e+00(    369) |
+|               copy operations, double: 1.09e+00(    281) |
+|          set value operations, double: 3.33e-01( 184320) |
+| interpolation and restriction, double: 3.92e+00(     40) |
+|                 self coupling, double: 3.46e+00( 133141) |
+|             neighbor coupling, double: 2.06e+00(     21) |
+|                      smoother, double: 2.80e+01(     60) |
+|            operator comm init, double: 2.88e-03(    846) |
+|            operator comm wait, double: 7.98e-01(    846) |
+|                    allreduces, double: 6.19e-02(     42) |
+|     smoother - pt 3, res comm, double: 4.04e+00(  30720) |
+|   smoother - pt 4, solve comm, double: 2.25e+01(  30720) |
+|          Hessenberg: qr update double: 9.82e-06(    660) |
+|         Hessenberg: bkwd subst double: 2.00e-06(    130) |
++----------------------------------------------------------+
+| depth:   1 / level:   2                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 3.81e-02(     59) |
+|         process inner product, double: 3.77e-03(     39) |
+|      2 flop vector operations, double: 1.65e-02(    215) |
+|      6 flop vector operations, double: 2.08e-03(     20) |
+|      8 flop vector operations, double: 4.92e-02(   1013) |
+|               copy operations, double: 2.33e-02(    449) |
+|          set value operations, double: 7.94e-03(   3778) |
+| interpolation and restriction, double: 1.40e-01(     78) |
+|                 self coupling, double: 9.86e-02(     39) |
+|             neighbor coupling, double: 1.00e+00(     39) |
+|                      smoother, double: 7.20e+00(    117) |
+|            operator comm init, double: 2.91e-03(   1638) |
+|            operator comm wait, double: 1.37e-01(   1638) |
+|                    allreduces, double: 5.29e-02(     98) |
+|     smoother - pt 3, res comm, double: 1.84e+00(   3744) |
+|   smoother - pt 4, solve comm, double: 5.22e+00(   3744) |
+|          Hessenberg: qr update double: 8.70e-06(    348) |
+|         Hessenberg: bkwd subst double: 4.05e-06(     97) |
++----------------------------------------------------------+
+| depth:   2 / level:   1                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 5.61e-03(    138) |
+|         process inner product, double: 1.10e-03(     99) |
+|      2 flop vector operations, double: 2.85e-03(    534) |
+|      6 flop vector operations, double: 3.12e-04(     39) |
+|      8 flop vector operations, double: 6.98e-03(   2616) |
+|               copy operations, double: 3.24e-03(   1128) |
+|          set value operations, double: 1.43e-03(    767) |
+| interpolation and restriction, double: 2.36e-02(    198) |
+|                 self coupling, double: 1.91e-02(     99) |
+|             neighbor coupling, double: 1.74e-01(     99) |
+|                      smoother, double: 1.55e+00(    297) |
+|            operator comm init, double: 2.84e-03(   4158) |
+|            operator comm wait, double: 5.26e-02(   4158) |
+|                    allreduces, double: 1.24e-02(    237) |
+|     smoother - pt 3, res comm, double: 3.90e-01(    594) |
+|   smoother - pt 4, solve comm, double: 1.11e+00(    594) |
+|          Hessenberg: qr update double: 1.51e-05(   1080) |
+|         Hessenberg: bkwd subst double: 6.08e-06(    279) |
++----------------------------------------------------------+
+| depth:   3 / level:   0                time    ( count ) |
++----------------------------------------------------------+
+|          global inner product, double: 1.47e-03(     50) |
+|         process inner product, double: 8.84e-04(    390) |
+|      2 flop vector operations, double: 6.74e-05(    440) |
+|      6 flop vector operations, double: 2.81e-05(     50) |
+|      8 flop vector operations, double: 2.86e-03(  10915) |
+|               copy operations, double: 2.04e-04(    819) |
+|          set value operations, double: 7.55e-03(  69223) |
+|                 self coupling, double: 1.19e-01(   8569) |
+|             neighbor coupling, double: 9.99e-01(   8569) |
+|            operator comm init, double: 4.95e-02( 102828) |
+|            operator comm wait, double: 1.01e-01( 102828) |
+|                    allreduces, double: 8.89e-03(    880) |
+|          Hessenberg: qr update double: 9.19e-05(  30006) |
+|         Hessenberg: bkwd subst double: 4.16e-05(   5781) |
++----------------------------------------------------------+
+| flop/lattice site:  7.46e+07                             |
+| flop/s/MPIprocess:  2.00e+11                             |
++----------------------------------------------------------+
+
+-----------------------------------
+-----------------------------------
+	 Solve time 48.954552,	 Iters 20,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-01
+-----------------------------------
+-----------------------------------
+-----------------------------------
+-----------------------------------
+	 Solve time 3.177465,	 Iters 10,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-01
+-----------------------------------
+-----------------------------------
+1	 	variance = 0.000000+i0.000000 	 t = 52.426880, 	 d = 0.866
+-----------------------------------
+-----------------------------------
+	 Solve time 3.072147,	 Iters 10,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-01
+-----------------------------------
+-----------------------------------
+-----------------------------------
+-----------------------------------
+	 Solve time 0.356187,	 Iters 10,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-01
+-----------------------------------
+-----------------------------------
+1	 	variance = 0.000000+i0.000000 	 t = 3.433406, 	 d = 0.447
+-----------------------------------
+-----------------------------------
+	 Solve time 0.347043,	 Iters 10,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-01
+-----------------------------------
+-----------------------------------
+-----------------------------------
+-----------------------------------
+	 Solve time 0.117488,	 Iters 81,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-11
+-----------------------------------
+-----------------------------------
+1	 	variance = 0.000000+i0.000000 	 t = 0.464935, 	 d = 0.224
+	... done
+	coarsest level ...
+-----------------------------------
+-----------------------------------
+	 Solve time 0.114863,	 Iters 79,	 used_tol 1.000000e-11,	 coarsest:tol 1.000000e-11
+-----------------------------------
+-----------------------------------
+Plain Solve Time:	0.114877
+1	 	variance = 0.000000+i0.000000 	 t = 0.114903, 	 d = 0.000
+	... done
+... done
+TIME MLMC  56.440204
+
+-----
+Resulting trace from MLMC  = 6818426.843915+i-942.026587 
+-----
+[31mwarning: amount of not freed memory: 0.032635 MB
+[0m
