@@ -357,8 +357,8 @@ int main( int argc, char **argv ) {
 
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
-    l.h_double.max_iters = 1000;
-    l.h_double.min_iters = 1000;
+    l.h_double.max_iters = 10000;
+    l.h_double.min_iters = 10000;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
     hutchinson_diver_double_alloc( &l, &threading );
