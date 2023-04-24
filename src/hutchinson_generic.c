@@ -173,11 +173,11 @@
     nr_iters = fgmres_PRECISION( p, l, threading );
     double t1 = MPI_Wtime();
 
-    int start, end;
+   /* int start, end;
     compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
     apply_operator_PRECISION( p->w, p->x, p, l, threading ); // compute w = D*x
     vector_PRECISION_minus( p->r, p->b, p->w, start, end, l ); // compute r = b - w
-   /* double norm = global_norm_PRECISION( p->r, p->v_start, p->v_end, l, threading ); //||r||
+    double norm = global_norm_PRECISION( p->r, p->v_start, p->v_end, l, threading ); //||r||
     double relative = norm/global_norm_PRECISION( p->b, p->v_start, p->v_end, l, threading );//||r||/b
 
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
