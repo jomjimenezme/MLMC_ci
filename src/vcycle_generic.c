@@ -155,6 +155,19 @@ void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECI
 
             }
           } else {
+
+#ifdef POLYPREC
+            if ( l->next_level->level==0 && l->next_level->p_PRECISION.polyprec_PRECISION.update_lejas == 1 ) {
+              // re-construct Lejas
+              re_construct_lejas_PRECISION( l->next_level, threading );
+            }
+
+            START_MASTER(threading)
+            l->next_level->p_PRECISION.preconditioner = l->next_level->p_PRECISION.polyprec_PRECISION.preconditioner;
+            END_MASTER(threading)
+            SYNC_MASTER_TO_ALL(threading)
+#endif
+
             fgmres_PRECISION( &(l->next_level->p_PRECISION), l->next_level, threading );
           }
         }
