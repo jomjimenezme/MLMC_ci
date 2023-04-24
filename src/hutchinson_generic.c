@@ -173,7 +173,7 @@
     nr_iters = fgmres_PRECISION( p, l, threading );
     double t1 = MPI_Wtime();
 
-   /* int start, end;
+    int start, end;
     compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
     apply_operator_PRECISION( p->w, p->x, p, l, threading ); // compute w = D*x
     vector_PRECISION_minus( p->r, p->b, p->w, start, end, l ); // compute r = b - w
@@ -183,9 +183,9 @@
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
 	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d, \t ||r||= %e, \t ||r||/||b|| = %e, \t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, norm, relative, p->tol, g.coarse_tol);
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
-*/
 
-    if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
+
+   // if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
     START_MASTER(threading);
     p->tol = buff1;
     if( l->level==0 ){
