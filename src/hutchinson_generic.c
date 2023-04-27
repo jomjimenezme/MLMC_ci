@@ -173,7 +173,7 @@
     nr_iters = fgmres_PRECISION( p, l, threading );
     double t1 = MPI_Wtime();
 
-    int start, end;
+   /* int start, end;
     compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
     apply_operator_PRECISION( p->w, p->x, p, l, threading ); // compute w = D*x
     vector_PRECISION_minus( p->r, p->b, p->w, start, end, l ); // compute r = b - w
@@ -183,9 +183,9 @@
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
 	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d, \t ||r||= %e, \t ||r||/||b|| = %e, \t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, norm, relative, p->tol, g.coarse_tol);
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
+*/
 
-
-   // if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
+    if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
     START_MASTER(threading);
     p->tol = buff1;
     if( l->level==0 ){
@@ -220,7 +220,9 @@
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-      return global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
+      complex_double aux = global_inner_product_double( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
+          if(g.my_rank==0)  printf( "\t----> one-level solve <-----\t%f \n", creal(aux) );
+        return aux;  
     }
   }
 
@@ -325,7 +327,9 @@
       vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
 
       //Deflate here?
-      return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );   
+      complex_double aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
+          if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
+        return aux; 
     }
   }
 
@@ -347,8 +351,8 @@
     END_MASTER(thrading);
     
     // for all but coarsest level
-    lx = l;
-    for( i=0; i<g.num_levels-1;i++ ){
+    lx = l->next_level->next_level;
+    for( i=2; i<g.num_levels-1;i++ ){
       // set the pointer to the mlmc difference operator
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
@@ -475,7 +479,11 @@
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-      return global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );   
+      
+      complex_double aux = global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );        
+      if(g.my_rank==0)  printf( "\t----> Orthogonal-level solve <-----\t%f \n", creal(aux) );
+      return aux; 
+      
     }
   }
 
@@ -516,9 +524,14 @@
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l->next_level );
       compute_core_start_end( 0, l->next_level->inner_vector_size, &start, &end, l->next_level, threading );
-      vector_PRECISION_minus( h->mlmc_b1, h->mlmc_b1, h->mlmc_b2, start, end, l->next_level ); // compute r = b - w
-      return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );   
+      vector_PRECISION_minus( h->mlmc_b1, h->mlmc_b1, h->mlmc_b2, start, end, l->next_level ); 
+      
+      complex_double aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );         
+      if(g.my_rank==0)  printf( "\t----> Intermediate-level solve <-----\t%f \n", creal(aux) );
+      return aux; 
+      //return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );   
     }
+    
   }
   
 

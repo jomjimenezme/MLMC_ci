@@ -357,8 +357,8 @@ int main( int argc, char **argv ) {
 
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
-    l.h_double.max_iters =1;// 1500;
-    l.h_double.min_iters =1;// 1500;
+    l.h_double.max_iters = 1500;
+    l.h_double.min_iters = 1500;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
     hutchinson_diver_double_alloc( &l, &threading );
@@ -387,7 +387,7 @@ int main( int argc, char **argv ) {
 
 
 
-
+/*
     double t_mlmc0, t_mlmc1;
     t_mlmc0 = MPI_Wtime();
     trace = mlmc_hutchinson_driver_double( &l, &threading );
@@ -404,8 +404,8 @@ int main( int argc, char **argv ) {
 
     SYNC_MASTER_TO_ALL(threadingx)
 
+*/
 
-/*
   trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)
@@ -414,7 +414,7 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)
-*/
+
     hutchinson_diver_double_free( &l, &threading );
   }
   
