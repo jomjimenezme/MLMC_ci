@@ -80,6 +80,7 @@ int main( int argc, char **argv ) {
     g.if_rademacher=0;
     g.on_solve = 0;
     struct Thread threading;
+    struct Thread *threadingx = &threading;  
     setup_threading(&threading, commonthreaddata, &l);
     setup_no_threading(no_threading, &l);
 
@@ -88,7 +89,14 @@ int main( int argc, char **argv ) {
     //t0x = MPI_Wtime();
 
     // setup up initial MG hierarchy
+    double t_setup0, t_update0, t_setup1, t_update1;
+    t_setup0 = MPI_Wtime();
     method_setup( NULL, &l, &threading );
+    t_setup1 = MPI_Wtime();
+    START_MASTER(threadingx)
+    if(g.my_rank==0)printf("TIME SETUP DDaAMG %f\n", t_setup1-t_setup0);
+    END_MASTER(threadingx)
+    fflush(0);
 
     //t1x = MPI_Wtime();
     //elap_time = t1x-t0x;
@@ -124,8 +132,15 @@ int main( int argc, char **argv ) {
     }
 #endif
 
-    // iterative phase
+     // iterative phase
+    t_update0 = MPI_Wtime();
     method_update( l.setup_iter, &l, &threading );
+    t_update1 = MPI_Wtime();
+
+    START_MASTER(threadingx)
+    if(g.my_rank==0)printf("TIME UPDATE  DDaAMG %f\n", t_update1-t_update0);
+    END_MASTER(threadingx)
+    fflush(0);
 
     //t1x = MPI_Wtime();
     //elap_time = t1x-t0x;
@@ -166,7 +181,7 @@ int main( int argc, char **argv ) {
 
 
 
-    struct Thread *threadingx = &threading;  
+   
 
 
 
@@ -348,7 +363,14 @@ int main( int argc, char **argv ) {
 
 
 
-
+    double t_powerit0, t_powerit1;
+    t_powerit0 = MPI_Wtime();
+    block_powerit_driver_double( &l, &threading );
+    t_powerit1 =MPI_Wtime();
+    START_MASTER(threadingx)
+    if(g.my_rank==0)printf("TIME POWER IT  %f\n", t_powerit1-t_powerit0);
+    END_MASTER(threadingx)
+    fflush(0);
 
 
 
@@ -357,8 +379,8 @@ int main( int argc, char **argv ) {
 
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
-    l.h_double.max_iters = 1500;
-    l.h_double.min_iters = 1500;
+    l.h_double.max_iters = 1000;
+    l.h_double.min_iters = 1000;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
     hutchinson_diver_double_alloc( &l, &threading );
@@ -376,13 +398,13 @@ int main( int argc, char **argv ) {
     //solve_driver( &l, &threading );
 
 
-   /* trace = hutchinson_driver_double( &l, &threading );
+    trace = hutchinson_driver_double( &l, &threading );
 
     START_MASTER(threadingx)
     if(g.my_rank==0) 
       printf("\n-----\nResulting trace from PLAIN  = %f+i%f \n-----\n", CSPLIT(trace));
     END_MASTER(threadingx)
-*/
+
 
 
 
@@ -406,7 +428,7 @@ int main( int argc, char **argv ) {
 
 */
 
-  trace = split_mlmc_hutchinson_driver_double( &l, &threading );
+ /* trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)
     if(g.my_rank==0) 
@@ -414,8 +436,9 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)
-
+*/
     hutchinson_diver_double_free( &l, &threading );
+    //block_powerit_double_free( &l, &threading );
   }
   
   finalize_common_thread_data(commonthreaddata);

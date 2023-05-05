@@ -230,6 +230,10 @@
   enum { _VTS = 20 };
   enum { _TRCKD_VAL, _STP_TIME, _SLV_ITER, _SLV_TIME, _CRS_ITER, _CRS_TIME, _SLV_ERR, _CGNR_ERR, _NUM_OPTB };
   
+  // these enums is for the different types of operators for block power iteration
+  enum { _DIFF_OP,_NON_DIFF_OP,_SPLIT_OP };
+  enum { _EVs,_SVs };
+
   typedef struct block_struct {
     int start, color, no_comm, *bt;
   } block_struct;
@@ -321,6 +325,8 @@
     //hutchinson
     hutchinson_float_struct h_float;
     hutchinson_double_struct h_double;
+
+
     // communication
     MPI_Request *reqs;
     int parent_rank, idle, neighbor_rank[8], num_processes, num_processes_dir[4];
@@ -364,6 +370,8 @@
     
     // next coarser level
     struct level_struct *next_level;
+
+    powerit_double_struct powerit;
 
 #if defined(GCRODR) || defined(POLYPREC)
     // 'bool', if on H will be copied

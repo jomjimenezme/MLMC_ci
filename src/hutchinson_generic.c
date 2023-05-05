@@ -220,8 +220,14 @@
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-      complex_double aux = global_inner_product_double( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
-          if(g.my_rank==0)  printf( "\t----> one-level solve <-----\t%f \n", creal(aux) );
+
+      if(g.trace_deflation_type[l->depth] =! 3){
+printf("------------------HHERE\n");
+        hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
+      }
+
+      complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
+          if(g.my_rank==0)  printf( "\t----> one-level solve <-----\t%f\n", aux );
         return aux;  
     }
   }
@@ -261,6 +267,10 @@
     if(g.my_rank==0)  printf( "... done\n" );
     END_MASTER(thrading);
 
+    //If deflation vectors are available
+    if(g.trace_deflation_type[l->depth] =! 3){
+    trace += hutchinson_deflated_direct_term(l, threading);
+    }
     return trace;
   }
 
@@ -327,7 +337,7 @@
       vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
 
       //Deflate here?
-      complex_double aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
+      complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
           if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
         return aux; 
     }
@@ -480,7 +490,7 @@
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
       
-      complex_double aux = global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );        
+      complex_PRECISION aux = global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );        
       if(g.my_rank==0)  printf( "\t----> Orthogonal-level solve <-----\t%f \n", creal(aux) );
       return aux; 
       
@@ -526,7 +536,7 @@
       compute_core_start_end( 0, l->next_level->inner_vector_size, &start, &end, l->next_level, threading );
       vector_PRECISION_minus( h->mlmc_b1, h->mlmc_b1, h->mlmc_b2, start, end, l->next_level ); 
       
-      complex_double aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );         
+      complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );         
       if(g.my_rank==0)  printf( "\t----> Intermediate-level solve <-----\t%f \n", creal(aux) );
       return aux; 
       //return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );   
@@ -535,7 +545,86 @@
   }
   
 
+// direct term
+  complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, struct Thread *threading){
+    double td0 = MPI_Wtime();
+    int i, start, end;
+    complex_PRECISION direct_trace = 0.0;
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+    compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+    // 0. create small matrix to store all dot products, let's call it small_T
+    complex_PRECISION small_T[l->powerit.nr_vecs];
+    
+    vector_PRECISION* vecs_buff1;
+    vector_PRECISION* vecs_buff2;
 
+    vecs_buff1 = NULL;
+    vecs_buff2 = NULL;
+  
+    PUBLIC_MALLOC( vecs_buff2, complex_PRECISION*, l->powerit.nr_vecs );
+    PUBLIC_MALLOC( vecs_buff1, complex_PRECISION*, l->powerit.nr_vecs );
+  
+    vecs_buff1[0] = NULL;
+    vecs_buff2[0] = NULL;
+  
+    PUBLIC_MALLOC( vecs_buff1[0], complex_PRECISION, l->powerit.nr_vecs*l->vector_size );
+    PUBLIC_MALLOC( vecs_buff2[0], complex_PRECISION, l->powerit.nr_vecs*l->vector_size );
+  
+    START_MASTER(threading)
+    for( i=1;i<l->powerit.nr_vecs;i++ ){
+      vecs_buff1[i] = vecs_buff1[0] + i*l->vector_size;
+      vecs_buff2[i] = vecs_buff2[0] + i*l->vector_size;
+    }
+    END_MASTER(threading)
+    SYNC_CORES(threading)
+
+
+
+    for( i=0; i<l->powerit.nr_vecs;i++ ){
+
+      // 1. apply the operator on the ith deflation vector
+      // TODO ...
+      vector_PRECISION_copy(p->b, l->powerit.vecs[i], start, end, l);  
+      apply_solver_PRECISION( l, threading );
+      vector_PRECISION_copy(l->powerit.vecs_buff1, p->x, start, end, l);  
+      
+      // 2. dot product (do only the diagonal ones)
+      // TODO ...
+      small_T[i] = global_inner_product_PRECISION( l->powerit.vecs[i], l->powerit.vecs_buff1, p->v_start, p->v_end, l, threading );
+
+      // 3. take trace of small_T, store in estimate.direct_trace
+      // TODO ...
+      direct_trace += small_T[i];
+    }
+    double td1 = MPI_Wtime();
+    
+    return direct_trace;
+  }
+
+  
+  void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l, struct Thread *threading ){
+    int start, end;
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
+    compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+
+    complex_PRECISION aux[l->powerit.nr_vecs];
+    
+    for( int i = 0; i<l->powerit.nr_vecs; i++ ){
+      aux[i] = global_inner_product_PRECISION(l->powerit.vecs[i], input, p->v_start, p->v_end, l, threading);	
+    }
+      
+    vector_PRECISION_scale( l->powerit.vecs_buff1 , l->powerit.vecs[0], aux[0], start, end, l);
+    for( int i = 1;  i< l->powerit.nr_vecs; i++ ){
+      
+      vector_PRECISION_copy(l->powerit.vecs_buff3, l->powerit.vecs_buff1, start, end, l);
+      vector_PRECISION_scale( l->powerit.vecs_buff2, l->powerit.vecs[i], aux[i], start, end, l);
+      vector_PRECISION_plus( l->powerit.vecs_buff1 , l->powerit.vecs_buff3 , l->powerit.vecs_buff2, start, end, l);
+
+    }
+    
+    vector_PRECISION_minus(  input, input, l->powerit.vecs_buff1, start, end, l );
+    
+  }
   // -------------------------------------------------------------------
 
   
