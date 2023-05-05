@@ -279,6 +279,19 @@ typedef struct {
     double count[_NUM_PROF];
     char name[_NUM_PROF][50];
   } profiling_PRECISION_struct;
+
+  typedef struct {
+    int nr_vecs, nr_cycles,spec_type;
+    double bp_tol, tol_buff;
+    vector_PRECISION* vecs;
+    vector_PRECISION vecs_buff1;
+    vector_PRECISION vecs_buff2;
+    vector_PRECISION vecs_buff3;
+
+    // buffer to use in Gram Schmidt orthogonalizations
+    complex_PRECISION* gs_buffer;  
+    
+  } powerit_PRECISION_struct;
   
   #ifdef PROFILING
     #define PROF_PRECISION_START_UNTHREADED( TYPE ) do{ l->prof_PRECISION.time[TYPE] -= MPI_Wtime(); }while(0)

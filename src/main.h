@@ -394,8 +394,10 @@
         *post_smooth_iter, *block_iter, *setup_iter, *ncycle,
         method, odd_even, rhs, propagator_coords[4],
         interpolation, randomize, *num_eig_vect, num_coarse_eig_vect, kcycle, mixed_precision,
-        restart, max_restart, kcycle_restart, kcycle_max_restart, coarse_iter, coarse_restart;
-    double tol, coarse_tol, kcycle_tol, csw, rho, *relax_fac;
+        restart, max_restart, kcycle_restart, kcycle_max_restart, coarse_iter, coarse_restart,
+        *trace_deflation_type, *trace_deflation_nr_vectors,
+        *trace_powerit_cycles, *trace_powerit_spectrum_type;
+    double tol, coarse_tol, kcycle_tol, csw, rho, *relax_fac, *trace_powerit_solver_tol;
 #ifdef GCRODR
     int gcrodr_k, gcrodr_k_setup, gcrodr_k_solve;
     int gcrodr_upd_itrs_solve;
@@ -625,7 +627,8 @@
 #include "main_post_def_float.h"
 #include "main_post_def_double.h"
 
-//#include "powerit_double.h"
+#include "powerit_float.h"
+#include "powerit_double.h"
 #include "hutchinson_float.h"
 #include "hutchinson_double.h"
 
