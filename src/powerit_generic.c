@@ -13,7 +13,6 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int op_id, int depth
   // access l at the right level
   level_struct* lx = l;
   for( i=0;i<g.num_levels;i++ ){
-if(g.my_rank==0) printf("level %d, \t depth%d", lx->level, lx->depth);
     if( i==depth_bp_op ){ break; }
     lx = lx->next_level;
   }
@@ -83,7 +82,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
   // dx trace deflation nr vectors: 10
 
   for( i=0;i<g.num_levels;i++ ){
-             // if(g.my_rank==0)printf("\nLevel and request--------------- %d request: %d\n", i, g.trace_deflation_type[i]);
+              if(g.my_rank==0)printf("\nLevel and request--------------- %d request: %d\n", i, g.trace_deflation_type[i]);
 
     // in case no deflation is requested
     if( g.trace_deflation_type[i]==3 ){ continue; }
@@ -129,8 +128,9 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     block_powerit_PRECISION_init_and_alloc( spec_type, op_id, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
     //blind_bp_op_PRECISION_apply( depth_bp_op, l, threading );
     block_powerit_PRECISION( op_id, depth_bp_op, l, threading );
-      
+    printf("About to finish powerit_driver\n");  
   }
+printf("EXITING powerit driver\n");
 }
 
 
@@ -161,7 +161,7 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
 
   // in the SVs case, this tests the eigenvectors coming out of the Hermitian problem
   test_powerit_quality_PRECISION( op_id, lx, threading );
-
+printf("AFTER test call, applying gamma\n");
   // apply gamma5 to the final result, if singular vectors are wanted
   if( lx->powerit.spec_type ==_SVs ){
     for( i=0;i<lx->powerit.nr_vecs;i++ ){
@@ -176,6 +176,7 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
     }
     SYNC_CORES(threading)
   }
+printf("AFTER Applying Gamma call\n");
 }
 
 

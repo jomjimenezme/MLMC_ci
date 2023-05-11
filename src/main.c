@@ -361,8 +361,7 @@ int main( int argc, char **argv ) {
 #endif
 
 
-
-
+    g.on_solve = 1;
     double t_powerit0, t_powerit1;
     t_powerit0 = MPI_Wtime();
     block_powerit_driver_double( &l, &threading );
@@ -394,7 +393,7 @@ int main( int argc, char **argv ) {
     h->tol_per_level[1] = sqrt(0.20);
     h->tol_per_level[2] = sqrt(0.05);
 
-    g.on_solve = 1;
+    
     //solve_driver( &l, &threading );
 
 

@@ -221,8 +221,8 @@
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
 
-      if(g.trace_deflation_type[l->depth] =! 3){
-printf("------------------HHERE\n");
+      if(g.trace_deflation_type[l->depth] != 3){
+if(g.my_rank==0) printf("------------------HHERE\n");
         hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
       }
 
@@ -268,8 +268,9 @@ printf("------------------HHERE\n");
     END_MASTER(thrading);
 
     //If deflation vectors are available
-    if(g.trace_deflation_type[l->depth] =! 3){
-    trace += hutchinson_deflated_direct_term(l, threading);
+    if(g.trace_deflation_type[l->depth] != 3){
+    trace += hutchinson_deflated_direct_term_PRECISION(l, threading);
+printf("HEEERE---2!!!!");
     }
     return trace;
   }
