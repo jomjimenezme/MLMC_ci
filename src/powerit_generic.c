@@ -151,6 +151,7 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
   END_LOCKED_MASTER(threading)
   SYNC_CORES(threading)
 
+
   for( i=0;i<lx->powerit.nr_cycles;i++ ){
     // apply the operator on the vectors ...
     blind_bp_op_PRECISION_apply( op_id, lx, threading );
@@ -160,10 +161,10 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
   }
 
   // in the SVs case, this tests the eigenvectors coming out of the Hermitian problem
-  test_powerit_quality_PRECISION( op_id, lx, threading );
+  //test_powerit_quality_PRECISION( op_id, lx, threading );
 printf("AFTER test call, applying gamma\n");
   // apply gamma5 to the final result, if singular vectors are wanted
-  if( lx->powerit.spec_type ==_SVs ){
+ /* if( lx->powerit.spec_type ==_SVs ){
     for( i=0;i<lx->powerit.nr_vecs;i++ ){
       if( lx->depth==0 ){
         gamma5_PRECISION( lx->powerit.vecs[i], lx->powerit.vecs[i], lx, threading );
@@ -176,7 +177,7 @@ printf("AFTER test call, applying gamma\n");
     }
     SYNC_CORES(threading)
   }
-printf("AFTER Applying Gamma call\n");
+printf("AFTER Applying Gamma call\n");*/
 }
 
 
@@ -325,18 +326,30 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 }
 
 void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
-//TODO: IMLEMENT BOTH SPLIT OPERATORS
+//TODO: IMLEMENT BOTH SPLIT OPERATORS??
   int start, end;
+printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
 
   gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
-  //  (I - P_{l} P_{l}^{H}) A_{l}^{-1} 
-  apply_solver_powerit_PRECISION(l, threading);
-      
-  apply_R_PRECISION(l->powerit.vecs_buff1, p->x, l, threading);
-  apply_P_PRECISION(l->powerit.vecs_buff2, l->powerit.vecs_buff1, l, threading);
-  vector_PRECISION_minus( l->powerit.vecs[i], p->x, l->powerit.vecs_buff2, start, end, l );
- }
+  
+  apply_P_PRECISION( p->b, l->powerit.vecs[i], l, threading );
+  apply_solver_powerit_PRECISION( l, threading );
+  apply_R_PRECISION( l->powerit.vecs_buff2, p->x, l, threading );
+
+  
+  
+  level_struct* lxc = l->next_level;
+  gmres_PRECISION_struct* pxc = get_p_struct_PRECISION(lxc);
+  compute_core_start_end( 0, lxc->inner_vector_size, &start, &end, lxc, threading );
+  
+  vector_PRECISION_copy( pxc->b, l->powerit.vecs[i], start, end, lxc );
+  // solution of this solve is in l->next_level->p_PRECISION.x
+  apply_solver_powerit_PRECISION( lxc, threading );
+
+  vector_PRECISION_minus( l->powerit.vecs[i], l->powerit.vecs_buff2,  pxc->x,  start, end, l );
+     
+}
 
  
  void blind_bp_op_PRECISION_apply( int op_id, level_struct* lx, struct Thread* threading ){
@@ -408,16 +421,16 @@ void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threadin
 int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
 
     int nr_iters;
-    double buff_coarsest_tol, buff_coarse_tol;
+    PRECISION buff_coarsest_tol, buff_coarse_tol;
     
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     
     START_MASTER(threading)
     buff_coarse_tol = p->tol;
-    p->tol = l->powerit.tol_buff;
+    p->tol = g.trace_powerit_solver_tol[l->depth];
     if( l->level==0 ){
       buff_coarsest_tol = g.coarse_tol;
-      g.coarse_tol = l->powerit.tol_buff;
+      g.coarse_tol = g.trace_powerit_solver_tol[l->depth];
     }
     END_MASTER(threading)
     SYNC_CORES(threading)
@@ -432,7 +445,7 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
     END_MASTER(threading)
     SYNC_MASTER_TO_ALL(threading)
 
-
+  
     return nr_iters;
   }
 

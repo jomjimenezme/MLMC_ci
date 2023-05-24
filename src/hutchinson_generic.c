@@ -412,7 +412,7 @@ printf("HEEERE---2!!!!");
     
     // for all but coarsest level
     lx = l;
-    for( i=0; i<g.num_levels-1;i++ ){  
+    for( i=0; i<1;i++ ){  
       // set the pointer to the split intermediate operator
       h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 1, threading );
@@ -428,14 +428,14 @@ printf("HEEERE---2!!!!");
     END_MASTER(thrading);
     
     // for all but coarsest level
-    lx = l;
+ /*   lx = l;
     for( i=0; i<g.num_levels-1;i++ ){      
       // set the pointer to the split orthogonal operator
       h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
       trace += estimate.acc_trace/estimate.sample_size;
       lx = lx->next_level; 
-    }
+    }*/
     
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
@@ -447,10 +447,10 @@ printf("HEEERE---2!!!!");
 
     // coarsest level
     // set the pointer to the coarsest-level Hutchinson estimator
-    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+   /* h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
     estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
     trace += estimate.acc_trace/estimate.sample_size;
-
+*/
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
@@ -504,7 +504,6 @@ printf("HEEERE---2!!!!");
   complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
 
     // FIRST TERM : result stored in h->mlmc_b1
-
     // 1. prolongate
     // 2. invert
     // 3. restrict
@@ -537,7 +536,12 @@ printf("HEEERE---2!!!!");
       compute_core_start_end( 0, l->next_level->inner_vector_size, &start, &end, l->next_level, threading );
       vector_PRECISION_minus( h->mlmc_b1, h->mlmc_b1, h->mlmc_b2, start, end, l->next_level ); 
       
+      if(g.trace_deflation_type[l->depth] != 3){
+        if(g.my_rank==0) printf("------------------HHERE\n");
+        hutchinson_deflate_vector_PRECISION(h->mlmc_b1, l, threading); 
+      }
       complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );         
+      
       if(g.my_rank==0)  printf( "\t----> Intermediate-level solve <-----\t%f \n", creal(aux) );
       return aux; 
       //return global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l->next_level, threading );   
