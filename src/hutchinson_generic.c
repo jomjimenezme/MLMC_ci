@@ -222,7 +222,7 @@
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
 
       if(g.trace_deflation_type[l->depth] != 3){
-if(g.my_rank==0) printf("------------------HHERE\n");
+	if(g.my_rank==0) printf("------------------HHERE\n");
         hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
       }
 
@@ -362,8 +362,8 @@ printf("HEEERE---2!!!!");
     END_MASTER(thrading);
     
     // for all but coarsest level
-    lx = l->next_level->next_level;
-    for( i=2; i<g.num_levels-1;i++ ){
+    lx = l;
+    for( i=0; i<g.num_levels-1;i++ ){
       // set the pointer to the mlmc difference operator
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
@@ -412,7 +412,7 @@ printf("HEEERE---2!!!!");
     
     // for all but coarsest level
     lx = l;
-    for( i=0; i<1;i++ ){  
+    for( i=0; i<g.num_levels-1 ;i++ ){  
       // set the pointer to the split intermediate operator
       h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 1, threading );
@@ -428,14 +428,14 @@ printf("HEEERE---2!!!!");
     END_MASTER(thrading);
     
     // for all but coarsest level
- /*   lx = l;
+    lx = l;
     for( i=0; i<g.num_levels-1;i++ ){      
       // set the pointer to the split orthogonal operator
       h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
       trace += estimate.acc_trace/estimate.sample_size;
       lx = lx->next_level; 
-    }*/
+    }
     
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
