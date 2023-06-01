@@ -397,13 +397,13 @@ int main( int argc, char **argv ) {
     //solve_driver( &l, &threading );
 
 
-    /*trace = hutchinson_driver_double( &l, &threading );
+    trace = hutchinson_driver_double( &l, &threading );
 
     START_MASTER(threadingx)
     if(g.my_rank==0) 
       printf("\n-----\nResulting trace from PLAIN  = %f+i%f \n-----\n", CSPLIT(trace));
     END_MASTER(threadingx)
-*/
+
 
 
 
@@ -427,7 +427,7 @@ int main( int argc, char **argv ) {
 */
 
 
-  trace = split_mlmc_hutchinson_driver_double( &l, &threading );
+ /* trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)
     if(g.my_rank==0) 
@@ -435,9 +435,11 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)
+*/
+
 
     hutchinson_diver_double_free( &l, &threading );
-    //block_powerit_double_free( &l, &threading );
+   block_powerit_double_free( &l, &threading );
   }
   
   finalize_common_thread_data(commonthreaddata);

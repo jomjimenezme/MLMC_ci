@@ -286,7 +286,7 @@ void powerit_non_diff_op_PRECISION( level_struct *l, int i, struct Thread *threa
   gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
 
-  fgmres_PRECISION( p, l, threading );
+  apply_solver_powerit_PRECISION(l, threading );
       
   vector_PRECISION_copy( l->powerit.vecs[i], p->x, start, end, l );
 
