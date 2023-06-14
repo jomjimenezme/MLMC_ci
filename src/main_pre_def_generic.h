@@ -290,7 +290,7 @@ typedef struct {
 
     // buffer to use in Gram Schmidt orthogonalizations
     complex_PRECISION* gs_buffer;  
-    
+    void (*apply_to_one_vector)();
   } powerit_PRECISION_struct;
   
   #ifdef PROFILING

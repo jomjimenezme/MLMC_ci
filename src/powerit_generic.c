@@ -88,13 +88,13 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     if( g.trace_deflation_type[i]==3 ){ continue; }
     switch(g.trace_deflation_type[i]){
       case 0:
-        apply_to_one_vector = powerit_diff_op_PRECISION; op_id = _NON_DIFF_OP;
+        l->powerit.apply_to_one_vector = powerit_diff_op_PRECISION; op_id = _NON_DIFF_OP;
         break;
       case 1:
-        apply_to_one_vector = powerit_non_diff_op_PRECISION; op_id = _NON_DIFF_OP;
+        l->powerit.apply_to_one_vector = powerit_non_diff_op_PRECISION; op_id = _NON_DIFF_OP;
         break;
       case 2:
-        apply_to_one_vector = powerit_split_op_PRECISION; op_id = _SPLIT_OP;
+        l->powerit.apply_to_one_vector = powerit_split_op_PRECISION; op_id = _SPLIT_OP;
         break;
 
       default:
@@ -121,7 +121,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     //		   -- always call this operation with the finest-level l
     //		   -- after calling power iteration, the result is in lx->powerit.vecs, with lx
     //		      the level struct of the chosen level
-    if( depth_bp_op==(g.num_levels-1) && apply_to_one_vector == powerit_diff_op_PRECISION){
+    if( depth_bp_op==(g.num_levels-1) && l->powerit.apply_to_one_vector == powerit_diff_op_PRECISION){
       error0("There is no difference level operator at the coarsest level\n");
     }
 
@@ -393,7 +393,7 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
     END_MASTER(threading)
     SYNC_CORES(threading)
       
-    apply_to_one_vector(lx, i, threading);
+    lx->powerit.apply_to_one_vector(lx, i, threading);
     
     START_MASTER(threading)
     if (g.my_rank==0) printf(".");
