@@ -409,7 +409,7 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\tfull-rank difference levels ...\n" );
     END_MASTER(thrading);
-    
+   /* 
     // for all but coarsest level
     lx = l;
     for( i=0; i<g.num_levels-1 ;i++ ){  
@@ -419,6 +419,7 @@ printf("HEEERE---2!!!!");
       trace += estimate.acc_trace/estimate.sample_size;
       lx = lx->next_level;    
     }
+*/
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
@@ -447,10 +448,10 @@ printf("HEEERE---2!!!!");
 
     // coarsest level
     // set the pointer to the coarsest-level Hutchinson estimator
-   /* h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
     estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
     trace += estimate.acc_trace/estimate.sample_size;
-*/
+
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
@@ -491,6 +492,11 @@ printf("HEEERE---2!!!!");
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
       
+      if(g.trace_deflation_type[l->depth] != 3){
+        if(g.my_rank==0) printf("------------------HHERE\n");
+        hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
+      }
+
       complex_PRECISION aux = global_inner_product_PRECISION( h->mlmc_b1, p->x, p->v_start, p->v_end, l, threading );        
       if(g.my_rank==0)  printf( "\t----> Orthogonal-level solve <-----\t%f \n", creal(aux) );
       return aux; 

@@ -333,13 +333,25 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
   gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
   
-  apply_P_PRECISION( p->b, l->powerit.vecs[i], l, threading );
+ /* apply_P_PRECISION( p->b, l->powerit.vecs[i], l, threading );
   apply_solver_powerit_PRECISION( l, threading );
-  apply_R_PRECISION( l->powerit.vecs_buff2, p->x, l, threading );
+  apply_R_PRECISION( l->powerit.vecs_buff2, p->x, l, threading );*/
+  
+      apply_R_PRECISION( l->powerit.vecs_buff2, l->powerit.vecs[i], l, threading );
+      apply_P_PRECISION( l->powerit.vecs_buff1, l->powerit.vecs_buff2, l, threading );
+      vector_PRECISION_minus( l->powerit.vecs_buff1, l->powerit.vecs[i], l->powerit.vecs_buff1, start, end, l );
 
+      vector_PRECISION_copy( p->b, l->powerit.vecs_buff1, start, end, l );
+    
+    
+    // SECOND "factor"
+
+    
+      apply_solver_powerit_PRECISION( l, threading );
+    
   
   
-  level_struct* lxc = l->next_level;
+  /*level_struct* lxc = l->next_level;
   gmres_PRECISION_struct* pxc = get_p_struct_PRECISION(lxc);
   compute_core_start_end( 0, lxc->inner_vector_size, &start, &end, lxc, threading );
   
@@ -347,7 +359,7 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
   // solution of this solve is in l->next_level->p_PRECISION.x
   apply_solver_powerit_PRECISION( lxc, threading );
 
-  vector_PRECISION_minus( l->powerit.vecs[i], l->powerit.vecs_buff2,  pxc->x,  start, end, l );
+  vector_PRECISION_minus( l->powerit.vecs[i], l->powerit.vecs_buff2,  pxc->x,  start, end, l );*/
      
 }
 
