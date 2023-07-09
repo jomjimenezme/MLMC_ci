@@ -378,8 +378,8 @@ int main( int argc, char **argv ) {
 
 
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
-    l.h_double.max_iters = 1500;
-    l.h_double.min_iters = 1500;
+    l.h_double.max_iters = 500;
+    l.h_double.min_iters = 500;
     l.h_double.trace_tol = 1.0e-4;
     hutchinson_diver_double_init( &l, &threading );  
     hutchinson_diver_double_alloc( &l, &threading );
@@ -397,19 +397,19 @@ int main( int argc, char **argv ) {
     //solve_driver( &l, &threading );
 
 
-    trace = hutchinson_driver_double( &l, &threading );
+    /*trace = hutchinson_driver_double( &l, &threading );
 
     START_MASTER(threadingx)
     if(g.my_rank==0) 
       printf("\n-----\nResulting trace from PLAIN  = %f+i%f \n-----\n", CSPLIT(trace));
     END_MASTER(threadingx)
+*/
 
 
 
 
 
-
-   /* double t_mlmc0, t_mlmc1;
+    /*double t_mlmc0, t_mlmc1;
     t_mlmc0 = MPI_Wtime();
     trace = mlmc_hutchinson_driver_double( &l, &threading );
     t_mlmc1 =MPI_Wtime();
@@ -427,7 +427,7 @@ int main( int argc, char **argv ) {
 */
 
 
- /* trace = split_mlmc_hutchinson_driver_double( &l, &threading );
+  trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)
     if(g.my_rank==0) 
@@ -435,7 +435,7 @@ int main( int argc, char **argv ) {
     END_MASTER(threadingx)
 
     SYNC_MASTER_TO_ALL(threadingx)
-*/
+
 
 
     hutchinson_diver_double_free( &l, &threading );
