@@ -376,7 +376,7 @@ int main( int argc, char **argv ) {
 
 
 
-
+/*
 //TODO: KEEP THIS BEFORE ALLOCATING MEMORY OR MOVE TO .ini 
     l.h_double.max_iters = 500;
     l.h_double.min_iters = 500;
@@ -392,7 +392,7 @@ int main( int argc, char **argv ) {
     h->tol_per_level[0] = sqrt(0.75);
     h->tol_per_level[1] = sqrt(0.20);
     h->tol_per_level[2] = sqrt(0.05);
-
+*/
     
     //solve_driver( &l, &threading );
 
@@ -426,7 +426,7 @@ int main( int argc, char **argv ) {
     SYNC_MASTER_TO_ALL(threadingx)
 */
 
-
+/*
   trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
    START_MASTER(threadingx)
@@ -436,9 +436,9 @@ int main( int argc, char **argv ) {
 
     SYNC_MASTER_TO_ALL(threadingx)
 
+*/
 
-
-    hutchinson_diver_double_free( &l, &threading );
+    //hutchinson_diver_double_free( &l, &threading );
    block_powerit_double_free( &l, &threading );
   }
   

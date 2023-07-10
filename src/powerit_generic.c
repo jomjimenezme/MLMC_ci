@@ -161,7 +161,7 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
   }
 
   // in the SVs case, this tests the eigenvectors coming out of the Hermitian problem
-  //test_powerit_quality_PRECISION( op_id, lx, threading );
+  test_powerit_quality_PRECISION( op_id, lx, threading );
 printf("AFTER test call, applying gamma\n");
   // apply gamma5 to the final result, if singular vectors are wanted
  /* if( lx->powerit.spec_type ==_SVs ){
