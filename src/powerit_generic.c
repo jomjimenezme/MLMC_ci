@@ -139,8 +139,8 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
 
   // access l at the right level
   level_struct* lx = l;
-  int i;
-  for( i=0;i<g.num_levels;i++ ){
+  
+  for( int i=0;i<g.num_levels;i++ ){
     if( i==depth_bp_op ){ break; }
     lx = lx->next_level;
   }
@@ -152,12 +152,37 @@ void block_powerit_PRECISION( int op_id, int depth_bp_op, level_struct *l, struc
   SYNC_CORES(threading)
 
 
-  for( i=0;i<lx->powerit.nr_cycles;i++ ){
+  for( int i=0;i<lx->powerit.nr_cycles;i++ ){
     // apply the operator on the vectors ...
     blind_bp_op_PRECISION_apply( op_id, lx, threading );
     // ... and the resulting vectors are in lx->powerit.vecs
     //orthogonalize
     bp_qr_PRECISION( lx, threading );
+
+    gmres_PRECISION_struct* px = get_p_struct_PRECISION( lx );
+
+    complex_PRECISION dot, sum=0;
+  
+    if(g.my_rank==0)printf("\n");
+    for( int j=0;j<lx->powerit.nr_vecs;j++ ){
+      for( int i=0;i<lx->powerit.nr_vecs;i++ ){
+        dot= global_inner_product_PRECISION( lx->powerit.vecs[j], lx->powerit.vecs[i], px->v_start, px->v_end, lx, threading );
+  
+        if(i==j){
+          sum+=(conj(dot-1.0))*(dot-1.0);
+        }else{
+          sum+=conj(dot)*(dot);
+        }
+        //if(g.my_rank==0)printf("Dot Product %f\n", dot);
+	
+    //    if(g.my_rank==0)printf(" %.16e ",cabs(sum));
+        //if(g.my_rank==0)printf(" %.16e ",cabs(dot));
+      }
+      	
+        }
+    sum = sqrt(creal(sum))/sqrt(lx->powerit.nr_vecs);
+    if(g.my_rank==0)printf("NORM_RATIO\t %.4e \n", cabs(sum));
+
   }
 
   // in the SVs case, this tests the eigenvectors coming out of the Hermitian problem
@@ -328,7 +353,7 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
 //TODO: IMLEMENT BOTH SPLIT OPERATORS??
   int start, end;
-printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
+//printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
 
   gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
@@ -399,8 +424,8 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
     if (g.my_rank==0) printf(".");
     END_MASTER(threading)
   }
-             // if(g.my_rank==0)printf("\n\nHiii--------------- %d of %d\n", 0, lx->powerit.nr_vecs);
 
+ 
   double t1 = MPI_Wtime();
   START_MASTER(threading)
   if (g.my_rank==0) printf("\n");
