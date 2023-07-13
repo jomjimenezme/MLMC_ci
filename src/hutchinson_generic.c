@@ -129,7 +129,7 @@
     START_MASTER(threading);
 
 
-    if(g.my_rank==0) printf( "%d\t \tvariance = %f+i%f \t t = %f, \t d = %.3f\n", i, CSPLIT(variance), t1-t0, h->tol_per_level[l->depth]);
+    if(g.my_rank==0) printf( "%d\tvariance = %f+i%f \t t = %f, \t d = %.3f \t Term-Trace %f +i%f \n", i, CSPLIT(variance), t1-t0, h->tol_per_level[l->depth], CSPLIT(trace));
 
 
     END_MASTER(threading);
@@ -368,6 +368,10 @@ printf("HEEERE---2!!!!");
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
       trace += estimate.acc_trace/estimate.sample_size;
+      //If deflation vectors are available
+      if(g.trace_deflation_type[lx->depth] != 3){
+        trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+      }
       lx = lx->next_level;
     }
     START_MASTER(threading);
@@ -390,7 +394,8 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "... done\n" );
     END_MASTER(thrading);
-
+   
+    
     return trace;
   }
 
@@ -409,32 +414,40 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\tfull-rank difference levels ...\n" );
     END_MASTER(thrading);
-   /* 
+    
     // for all but coarsest level
-    lx = l;
+   /* lx = l;
     for( i=0; i<g.num_levels-1 ;i++ ){  
       // set the pointer to the split intermediate operator
       h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 1, threading );
       trace += estimate.acc_trace/estimate.sample_size;
+      //If deflation vectors are available
+      if(g.trace_deflation_type[lx->depth] != 3){
+        trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+      }
       lx = lx->next_level;    
     }
-*/
+
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-
+*/
     START_MASTER(threading);
     if(g.my_rank==0) printf( "\torthogonalized difference levels ...\n" );
     END_MASTER(thrading);
     
     // for all but coarsest level
     lx = l;
-    for( i=0; i<g.num_levels-1;i++ ){      
+    for( i=0; i<1;i++ ){      
       // set the pointer to the split orthogonal operator
       h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
-      estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+      estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );      
       trace += estimate.acc_trace/estimate.sample_size;
+      //If deflation vectors are available
+      if(g.trace_deflation_type[lx->depth] != 3){
+        trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+      }
       lx = lx->next_level; 
     }
     
@@ -449,13 +462,16 @@ printf("HEEERE---2!!!!");
     // coarsest level
     // set the pointer to the coarsest-level Hutchinson estimator
     h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    //estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
     trace += estimate.acc_trace/estimate.sample_size;
+    //If deflation vectors are available
+      if(g.trace_deflation_type[lx->depth] != 3){
+        trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+    }
 
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-
     return trace;
   }
 
@@ -608,6 +624,9 @@ printf("HEEERE---2!!!!");
       direct_trace += small_T[i];
     }
     double td1 = MPI_Wtime();
+    if(g.my_rank==0){
+      printf("Direct_Term \t %f+i%f", CSPLIT(direct_trace));
+    }
     
     return direct_trace;
   }
