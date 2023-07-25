@@ -184,9 +184,9 @@
 	if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d, \t ||r||= %e, \t ||r||/||b|| = %e, \t used_tol %e,\t coarsest:tol %e\n", t1-t0, nr_iters, norm, relative, p->tol, g.coarse_tol);
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
 */
-
-    if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
     START_MASTER(threading);
+    if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
+    
     p->tol = buff1;
     if( l->level==0 ){
       g.coarse_tol = buff2;
@@ -366,7 +366,7 @@ printf("HEEERE---2!!!!");
     
     // for all but coarsest level
     lx = l;
-    for( i=0; i<1; i++){//g.num_levels-1;i++ ){
+    for( i=0; i<1;i++){//g.num_levels-1 ;i++ ){ 
       // set the pointer to the mlmc difference operator
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
@@ -380,7 +380,7 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-   /* 
+   
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
     END_MASTER(thrading);
@@ -393,7 +393,7 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-    */
+    
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "... done\n" );
     END_MASTER(thrading);
@@ -433,7 +433,7 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-/*
+
     START_MASTER(threading);
     if(g.my_rank==0) printf( "\torthogonalized difference levels ...\n" );
     END_MASTER(thrading);
@@ -455,13 +455,13 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
     END_MASTER(thrading);
-*/
+
     // coarsest level
     // set the pointer to the coarsest-level Hutchinson estimator
-   /* h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
+    h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
     estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
     trace += estimate.acc_trace/estimate.sample_size;
-*/
+
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
@@ -613,7 +613,7 @@ printf("HEEERE---2!!!!");
       direct_trace += small_T[i];
     }
     double td1 = MPI_Wtime();
-    
+    if(g.my_rank==0) printf("Direct-Term \t %f +i %f\n");
     return direct_trace;
   }
 
