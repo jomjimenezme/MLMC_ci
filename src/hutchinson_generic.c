@@ -336,8 +336,11 @@ printf("HEEERE---2!!!!");
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
       vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
-
-      //Deflate here?
+      
+      if(g.trace_deflation_type[l->depth] != 3){
+        if(g.my_rank==0) printf("------------------HHERE\n");
+        hutchinson_deflate_vector_PRECISION(h->mlmc_b1, l, threading); 
+      }
       complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
           if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
         return aux; 
