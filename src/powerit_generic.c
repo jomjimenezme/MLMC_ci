@@ -308,18 +308,16 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 
   apply_R_PRECISION(pxc->b, p->b, l, threading);     
  
-  lxc->powerit.tol_buff = l->powerit.tol_buff;
-  apply_solver_powerit_PRECISION(lxc, threading);
 
+  lxc->powerit.tol_buff = g.trace_powerit_solver_tol[lxc->depth];
+  g.trace_powerit_solver_tol[lxc->depth] = g.trace_powerit_solver_tol[l->depth];
+  apply_solver_powerit_PRECISION(lxc, threading);
+  g.trace_powerit_solver_tol[lxc->depth] = lxc->powerit.tol_buff;
+  
   apply_P_PRECISION(l->powerit.vecs_buff2, pxc->x, l, threading);
   
   // fine
-  
-  START_MASTER(threading)
-  p->x = l->powerit.vecs_buff1;
-  END_MASTER(threading)
-  SYNC_CORES(threading)
-  fgmres_PRECISION( p, l, threading );
+  apply_solver_powerit_PRECISION(l, threading);
   
   vector_PRECISION_minus( l->powerit.vecs[i], p->x, l->powerit.vecs_buff2, start, end, l );
    
@@ -328,7 +326,6 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
 //TODO: IMLEMENT BOTH SPLIT OPERATORS??
   int start, end;
-printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
 
   gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
@@ -345,7 +342,11 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
   
   vector_PRECISION_copy( pxc->b, l->powerit.vecs[i], start, end, lxc );
   // solution of this solve is in l->next_level->p_PRECISION.x
-  apply_solver_powerit_PRECISION( lxc, threading );
+
+  lxc->powerit.tol_buff = g.trace_powerit_solver_tol[lxc->depth];
+  g.trace_powerit_solver_tol[lxc->depth] = g.trace_powerit_solver_tol[l->depth];
+  apply_solver_powerit_PRECISION(lxc, threading);
+  g.trace_powerit_solver_tol[lxc->depth] = lxc->powerit.tol_buff;
 
   vector_PRECISION_minus( l->powerit.vecs[i], l->powerit.vecs_buff2,  pxc->x,  start, end, l );
      
@@ -356,7 +357,7 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
 
   //TODO: where to put this?
   // apply gamma5 before either operator
-     int i;
+     int i, start, end;
   if( lx->powerit.spec_type == _SVs ){
     for( i=0;i<lx->powerit.nr_vecs;i++ ){
       if( lx->depth==0 ){
@@ -371,27 +372,15 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
     SYNC_CORES(threading)
   }
   
-  double buff_tol;
-
-  complex_PRECISION* buff_b;
-  complex_PRECISION* buff_x;
   gmres_PRECISION_struct* px = get_p_struct_PRECISION( lx );
 
-  buff_tol = px->tol;
-  buff_b = px->b;
-  buff_x = px->x;
-
-  START_MASTER(threading)
-  px->tol = lx->powerit.bp_tol;
-  END_MASTER(threading)
 
   double t0 = MPI_Wtime();
-  for( int i=0;i<lx->powerit.nr_vecs;i++ ){
 
-    START_MASTER(threading)
-    px->b = lx->powerit.vecs[i];
-    END_MASTER(threading)
-    SYNC_CORES(threading)
+  for( i=0;i<lx->powerit.nr_vecs;i++ ){
+    
+    compute_core_start_end( 0, lx->inner_vector_size, &start, &end, lx, threading );
+    vector_PRECISION_copy( px->b, lx->powerit.vecs[i], start, end, lx );
       
     lx->powerit.apply_to_one_vector(lx, i, threading);
     
@@ -407,12 +396,6 @@ printf("Solving with..... \t %e\n", g.trace_powerit_solver_tol[l->depth]);
   //if (g.my_rank==0) printf("time block : %f\n", t1-t0);
   END_MASTER(threading)
 
-  // restore values
-  START_MASTER(threading)
-  px->tol = buff_tol;
-  px->b = buff_b;
-  px->x = buff_x;
-  END_MASTER(threading)
 
 }
 
