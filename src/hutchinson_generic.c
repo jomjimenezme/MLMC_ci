@@ -373,7 +373,7 @@ printf("HEEERE---2!!!!");
       trace += estimate.acc_trace/estimate.sample_size;
       //If deflation vectors are available
       if(g.trace_deflation_type[lx->depth] != 3){
-        trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+        trace += hutchinson_deflated_direct_term_difference_PRECISION(lx, threading);
       }
       lx = lx->next_level;
     }
@@ -381,7 +381,7 @@ printf("HEEERE---2!!!!");
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
    
-    START_MASTER(threading);
+   /* START_MASTER(threading);
     if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
     END_MASTER(thrading);
     
@@ -393,7 +393,7 @@ printf("HEEERE---2!!!!");
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "\t... done\n" );
     END_MASTER(thrading);
-    
+    */
     START_MASTER(threading);
     if(g.my_rank==0)  printf( "... done\n" );
     END_MASTER(thrading);
@@ -562,6 +562,59 @@ printf("HEEERE---2!!!!");
   
 
 // direct term
+  complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_struct *l, struct Thread *threading){
+    double td0 = MPI_Wtime();
+    int i, start, end;
+    complex_PRECISION direct_trace = 0.0;
+    // 0. create small matrix to store all dot products, let's call it small_T
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+    complex_PRECISION small_T[l->powerit.nr_vecs];
+    
+
+
+    for( i=0; i<l->powerit.nr_vecs;i++ ){
+
+      // 1. apply the operator on the ith deflation vector
+      {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      vector_PRECISION_copy( p->b, l->powerit.vecs[i], start, end, l );
+      // solution of this solve is in l->p_PRECISION.x
+      apply_solver_PRECISION( l, threading );
+      }
+
+      {
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );      
+      apply_R_PRECISION( l->next_level->p_PRECISION.b, l->powerit.vecs[i], l, threading );
+      // the input of this solve is l->next_level->p_PRECISION.x, the output l->next_level->p_PRECISION.b
+      apply_solver_PRECISION( l->next_level, threading );
+      apply_P_PRECISION( l->powerit.vecs_buff2, l->next_level->p_PRECISION.x, l, threading );
+      }
+
+      {
+      int start, end;
+      gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
+      compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      vector_PRECISION_minus( l->powerit.vecs_buff1, p->x, l->powerit.vecs_buff1, start, end, l); 
+      }
+
+      // 2. dot product (do only the diagonal ones)
+      // TODO ...
+      small_T[i] = global_inner_product_PRECISION( l->powerit.vecs[i], l->powerit.vecs_buff1, p->v_start, p->v_end, l, threading );
+
+      // 3. take trace of small_T, store in estimate.direct_trace
+      // TODO ...
+      direct_trace += small_T[i];
+    }
+    double td1 = MPI_Wtime();
+    if(g.my_rank==0) printf("Direct-Term \t %f +i %f\n", CSPLIT(direct_trace));
+    return direct_trace;
+  }
+
+  
+
+
   complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, struct Thread *threading){
     double td0 = MPI_Wtime();
     int i, start, end;
@@ -571,31 +624,6 @@ printf("HEEERE---2!!!!");
     // 0. create small matrix to store all dot products, let's call it small_T
     complex_PRECISION small_T[l->powerit.nr_vecs];
     
-    vector_PRECISION* vecs_buff1;
-    vector_PRECISION* vecs_buff2;
-
-    vecs_buff1 = NULL;
-    vecs_buff2 = NULL;
-  
-    PUBLIC_MALLOC( vecs_buff2, complex_PRECISION*, l->powerit.nr_vecs );
-    PUBLIC_MALLOC( vecs_buff1, complex_PRECISION*, l->powerit.nr_vecs );
-  
-    vecs_buff1[0] = NULL;
-    vecs_buff2[0] = NULL;
-  
-    PUBLIC_MALLOC( vecs_buff1[0], complex_PRECISION, l->powerit.nr_vecs*l->vector_size );
-    PUBLIC_MALLOC( vecs_buff2[0], complex_PRECISION, l->powerit.nr_vecs*l->vector_size );
-  
-    START_MASTER(threading)
-    for( i=1;i<l->powerit.nr_vecs;i++ ){
-      vecs_buff1[i] = vecs_buff1[0] + i*l->vector_size;
-      vecs_buff2[i] = vecs_buff2[0] + i*l->vector_size;
-    }
-    END_MASTER(threading)
-    SYNC_CORES(threading)
-
-
-
     for( i=0; i<l->powerit.nr_vecs;i++ ){
 
       // 1. apply the operator on the ith deflation vector
@@ -613,11 +641,16 @@ printf("HEEERE---2!!!!");
       direct_trace += small_T[i];
     }
     double td1 = MPI_Wtime();
-    if(g.my_rank==0) printf("Direct-Term \t %f +i %f\n");
+    if(g.my_rank==0) printf("Direct-Term \t %f +i %f\n", CSPLIT(direct_trace));
     return direct_trace;
   }
 
-  
+
+
+
+
+
+
   void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l, struct Thread *threading ){
     int start, end;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);

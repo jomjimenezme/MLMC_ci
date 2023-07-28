@@ -28,6 +28,8 @@
   complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, struct Thread *threading);
   void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l, struct Thread *threading );
 
+  complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_struct *l, struct Thread *threading);
+
   complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
   complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
   complex_PRECISION hutchinson_deflated_split_orthogonal_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading);
