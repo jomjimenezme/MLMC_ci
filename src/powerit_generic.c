@@ -79,10 +79,11 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
 
   // specify the following in the .ini input file, at different levels
   // dx trace deflation type: 0   // 0 is difference, 1 is non-difference, 2 is split orthogonal, 3 is no deflation
-  // dx trace deflation nr vectors: 10
+  // dx trace deflation nr vectors
 
+  printf("\n");
   for( i=0;i<g.num_levels;i++ ){
-              if(g.my_rank==0)printf("\nLevel and request--------------- %d request: %d\n", i, g.trace_deflation_type[i]);
+    if(g.my_rank==0)printf("BPI : level %d, request %d\n", i, g.trace_deflation_type[i]);
 
     // in case no deflation is requested
     if( g.trace_deflation_type[i]==3 ){ continue; }
@@ -126,11 +127,8 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     }
 
     block_powerit_PRECISION_init_and_alloc( spec_type, op_id, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
-    //blind_bp_op_PRECISION_apply( depth_bp_op, l, threading );
     block_powerit_PRECISION( op_id, depth_bp_op, l, threading );
-    printf("About to finish powerit_driver\n");  
   }
-printf("EXITING powerit driver\n");
 }
 
 

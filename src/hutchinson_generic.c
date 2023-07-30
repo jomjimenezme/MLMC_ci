@@ -117,8 +117,8 @@
           variance += conj(samples[j] - trace) * (samples[j] - trace);
         }
         variance = variance / j;
-	START_MASTER(threading);
-        if(g.my_rank==0) printf( "%d\tVariance:\t%f\n", i, creal(variance));
+	    START_MASTER(threading);
+        if(g.my_rank==0) printf( "\t%d, trace:\t%f+%f, variance: \t%f\n", i, creal(trace), cimag(trace), creal(variance));
         END_MASTER(threading);
         RMSD = sqrt(creal(variance)/j);
         if( i > h->min_iters && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[l->depth]) break; 
@@ -185,7 +185,7 @@
     if(g.my_rank==0)printf("-----------------------------------\n-----------------------------------\n");
 */
     START_MASTER(threading);
-    if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
+    //if(g.my_rank==0)printf("\t Solve time %f,\t Iters %d\n", t1-t0, nr_iters);
     
     p->tol = buff1;
     if( l->level==0 ){
@@ -236,7 +236,7 @@
   complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
     
     START_MASTER(threading);
-    if(g.my_rank==0)  printf( "Trace computation via Hutchinson's method ...\n" );
+    //if(g.my_rank==0)  printf( "Trace computation via Hutchinson's method ...\n" );
     END_MASTER(thrading);
     
     int i;
@@ -342,8 +342,8 @@ printf("HEEERE---2!!!!");
         hutchinson_deflate_vector_PRECISION(h->mlmc_b1, l, threading); 
       }
       complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
-          if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
-        return aux; 
+      //if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
+      return aux; 
     }
   }
 
@@ -351,7 +351,7 @@ printf("HEEERE---2!!!!");
 
   complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
     START_MASTER(threading);
-    if(g.my_rank==0)  printf( "Trace computation via 'traditional' difference levels ...\n" );
+    //if(g.my_rank==0)  printf( "Trace computation via 'traditional' difference levels ...\n" );
     END_MASTER(thrading);
 
     int i;
@@ -361,7 +361,7 @@ printf("HEEERE---2!!!!");
     level_struct* lx;
 
     START_MASTER(threading);
-    if(g.my_rank==0)  printf( "\tdifference levels ...\n" );
+    //if(g.my_rank==0)  printf( "\tdifference levels ...\n" );
     END_MASTER(thrading);
     
     // for all but coarsest level
@@ -404,7 +404,7 @@ printf("HEEERE---2!!!!");
 
  complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
     START_MASTER(threading);
-    if(g.my_rank==0)  printf( "Trace computation via split levels ...\n" );
+    //if(g.my_rank==0)  printf( "Trace computation via split levels ...\n" );
     END_MASTER(thrading);
 
     int i;
@@ -661,12 +661,16 @@ printf("HEEERE---2!!!!");
     for( int i = 0; i<l->powerit.nr_vecs; i++ ){
       aux[i] = global_inner_product_PRECISION(l->powerit.vecs[i], input, p->v_start, p->v_end, l, threading);	
     }
-      
+
+    // buff1 <- alpha0 * v0
     vector_PRECISION_scale( l->powerit.vecs_buff1 , l->powerit.vecs[0], aux[0], start, end, l);
     for( int i = 1;  i< l->powerit.nr_vecs; i++ ){
       
+      // buff3 <- buff1
       vector_PRECISION_copy(l->powerit.vecs_buff3, l->powerit.vecs_buff1, start, end, l);
+      // buff2 <- alphai * vi
       vector_PRECISION_scale( l->powerit.vecs_buff2, l->powerit.vecs[i], aux[i], start, end, l);
+      // buff1 <- buff3 + buff2
       vector_PRECISION_plus( l->powerit.vecs_buff1 , l->powerit.vecs_buff3 , l->powerit.vecs_buff2, start, end, l);
 
     }
@@ -675,5 +679,38 @@ printf("HEEERE---2!!!!");
     
   }
   // -------------------------------------------------------------------
+
+
+
+
+  // i=0
+  
+  // buff1		alpha0*v0
+
+
+  // i=1
+  
+  // buff3		buff1 (alpha0*v0)
+  // buff2		alpha1*v1
+  // buff1		ADD( buff3,buff2 )
+
+  // i=2
+  
+  // buff3		buff1 (alpha0*v0 + alpha1*v1)
+  // buff2		alpha2*v2
+  // buff1		ADD( buff3,buff2 )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   

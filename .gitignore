@@ -1,8 +1,5 @@
 !.gitignore
 dependencies/*
-!dependencies/install_dependencies_01.sh
-!dependencies/install_dependencies_02.sh
-!dependencies/install_dependencies_03.sh
 mpi-*
 runs_output/
 
