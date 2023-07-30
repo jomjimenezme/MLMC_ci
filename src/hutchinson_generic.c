@@ -15,8 +15,11 @@ struct sample {
     
 void hutchinson_diver_PRECISION_init( level_struct *l, struct Thread *threading ) {
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
+
+  h->max_iters = NULL;
+  h->min_iters = NULL;
         
-  //MLMC
+  // MLMC
   h->mlmc_b1 = NULL;
   h->mlmc_b2 =NULL;
   h->mlmc_testing =NULL;
@@ -26,18 +29,30 @@ void hutchinson_diver_PRECISION_init( level_struct *l, struct Thread *threading 
 
 
 void hutchinson_diver_PRECISION_alloc( level_struct *l, struct Thread *threading ) {
+  int i;
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION) ;
-        
+
+  PUBLIC_MALLOC( h->max_iters, int, g.num_levels );
+  PUBLIC_MALLOC( h->min_iters, int, g.num_levels );
+
   //For MLMC
   PUBLIC_MALLOC( h->mlmc_b1, complex_PRECISION, l->inner_vector_size );
   PUBLIC_MALLOC( h->mlmc_b2, complex_PRECISION, l->inner_vector_size );
   PUBLIC_MALLOC( h->mlmc_testing, complex_PRECISION, l->inner_vector_size );
   PUBLIC_MALLOC( h->rademacher_vector, complex_PRECISION, l->inner_vector_size );
+
+  for ( i=0;i<g.num_levels;i++ ) {
+    h->max_iters[i] = g.trace_max_iters[i];
+    h->min_iters[i] = g.trace_min_iters[i];
+  }
 }
 
 
 void hutchinson_diver_PRECISION_free( level_struct *l, struct Thread *threading ) {
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION) ;
+
+  PUBLIC_FREE( h->max_iters, int, g.num_levels );
+  PUBLIC_FREE( h->min_iters, int, g.num_levels );
         
   PUBLIC_FREE( h->mlmc_b1, complex_PRECISION, l->inner_vector_size );   
   PUBLIC_FREE( h->mlmc_b2, complex_PRECISION, l->inner_vector_size );   
@@ -71,21 +86,21 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
   struct sample estimate;
 
   // TODO : move this allocation to some init function
-  complex_PRECISION* samples = (complex_PRECISION*) malloc( h->max_iters*sizeof(complex_PRECISION) );
-  memset( samples, 0.0, h->max_iters*sizeof(complex_PRECISION) );
+  complex_PRECISION* samples = (complex_PRECISION*) malloc( h->max_iters[l->depth]*sizeof(complex_PRECISION) );
+  memset( samples, 0.0, h->max_iters[l->depth]*sizeof(complex_PRECISION) );
 
   estimate.acc_trace = 0.0;
 
-  for( i=0; i<h->max_iters;i++ ){
-
+  for( i=0; i<h->max_iters[l->depth];i++ ){
     // 1. create Rademacher vector, stored in h->rademacher_vector
     rademacher_create_PRECISION( l, h, type, threading );
 
     // 2. apply the operator to the Rademacher vector
     // 3. dot product
-    one_sample = h->hutch_compute_one_sample( l, h, threading );
+    one_sample = h->hutch_compute_one_sample( -1, l, h, threading );
+
     samples[i] = one_sample;
-      
+
     // 4. compute estimated trace and variance, print something?
     estimate.acc_trace += one_sample;
 
@@ -104,7 +119,7 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
       }
       END_MASTER(threading);
       RMSD = sqrt(creal(variance)/j);
-      if( i > h->min_iters && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[l->depth]) break; 
+      if( i > h->min_iters[l->depth] && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[l->depth]) break; 
     }
   }
   if(g.my_rank==0) printf("\n");
@@ -157,32 +172,42 @@ int apply_solver_PRECISION( level_struct* l, struct Thread *threading ){
 }
 
 
-complex_PRECISION hutchinson_plain_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+// if type_appl==-1 : Hutchinson-like
+// else : direct term, where type_appl is the index of the deflation vector to apply
+//        the operator on
+complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
   {
     int start, end;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
 
-    vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+    if ( type_appl==-1 ) {
+      vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+    } else {
+      vector_PRECISION_copy( p->b, l->powerit_PRECISION.vecs[type_appl], start, end, l );
+    }
   }
-  //double t0 = MPI_Wtime();
+
   {
     apply_solver_PRECISION( l, threading );
   }
-  //double t1 = MPI_Wtime();
-  START_MASTER(threading);
-  END_MASTER(threading);
+
   // subtract the results and perform dot product
   {
     int start, end;
+    complex_PRECISION aux;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
 
-    if(g.trace_deflation_type[l->depth] != 3){
-      hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
+    if ( type_appl==-1 ) {
+      if(g.trace_deflation_type[l->depth] != 3){
+        hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
+      }
+      aux = global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
+    } else {
+      vector_PRECISION_copy(l->powerit_PRECISION.vecs_buff1, p->x, start, end, l);  
+      aux = global_inner_product_PRECISION( l->powerit_PRECISION.vecs[type_appl], l->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, l, threading );
     }
-
-    complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
 
     return aux;  
   }
@@ -193,21 +218,16 @@ complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *t
   complex_PRECISION trace = 0.0;
   struct sample estimate;
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
-  level_struct* lx;
-  START_MASTER(threading);
-  END_MASTER(thrading);
+  level_struct* lx = l;
 
-  lx = l;
   // set the pointer to the finest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-    
   estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-    
   trace += estimate.acc_trace/estimate.sample_size;
 
-  //If deflation vectors are available
+  // if deflation vectors are available
   if(g.trace_deflation_type[l->depth] != 3){
-    trace += hutchinson_deflated_direct_term_PRECISION(l, threading);
+    trace += hutchinson_deflated_direct_term_PRECISION( l, h, threading );
   }
 
   return trace;
@@ -239,14 +259,20 @@ void apply_R_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct*
 
 
 // the term tr( A_{l}^{-1} - P A_{l+1}^{-1} R )
-complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+complex_PRECISION hutchinson_mlmc_difference_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
   // FIRST TERM : result stored in p->x
   // apply A_{l}^{-1}
   {
     int start, end;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-    vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+
+    if ( type_appl==-1 ) {
+      vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+    } else {
+      vector_PRECISION_copy( p->b, l->powerit_PRECISION.vecs[type_appl], start, end, l );
+    }
+
     // solution of this solve is in l->p_PRECISION.x
     apply_solver_PRECISION( l, threading );
   }
@@ -256,7 +282,13 @@ complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchin
   // 2. invert
   // 3. Prolongate
   {
-    apply_R_PRECISION( l->next_level->p_PRECISION.b, h->rademacher_vector, l, threading );
+
+    if ( type_appl==-1 ) {
+      apply_R_PRECISION( l->next_level->p_PRECISION.b, h->rademacher_vector, l, threading );
+    } else {
+      apply_R_PRECISION( l->next_level->p_PRECISION.b, l->powerit_PRECISION.vecs[type_appl], l, threading );
+    }
+
     // the input of this solve is l->next_level->p_PRECISION.x, the output l->next_level->p_PRECISION.b
     apply_solver_PRECISION( l->next_level, threading );
     apply_P_PRECISION( h->mlmc_b2, l->next_level->p_PRECISION.x, l, threading );
@@ -265,79 +297,61 @@ complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchin
   // subtract the results and perform dot product
   {
     int start, end;
+    complex_PRECISION aux;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
     vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l); 
-      
-    if(g.trace_deflation_type[l->depth] != 3){
-      if(g.my_rank==0) printf("------------------HHERE\n");
-      hutchinson_deflate_vector_PRECISION(h->mlmc_b1, l, threading); 
+
+    if ( type_appl==-1 ) {
+      if(g.trace_deflation_type[l->depth] != 3){
+        hutchinson_deflate_vector_PRECISION(h->mlmc_b1, l, threading); 
+      }
+      aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
+    } else {
+      aux = global_inner_product_PRECISION( l->powerit_PRECISION.vecs[type_appl], h->mlmc_b1, p->v_start, p->v_end, l, threading );
     }
-    complex_PRECISION aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
-    //if(g.my_rank==0)  printf( "\t----> Difference-level solve <-----\t%f \n", creal(aux) );
+
     return aux; 
   }
 }
 
 
 complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
-  START_MASTER(threading);
-  //if(g.my_rank==0)  printf( "Trace computation via 'traditional' difference levels ...\n" );
-  END_MASTER(thrading);
-
   int i;
   complex_PRECISION trace = 0.0;
   struct sample estimate;
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
   level_struct* lx;
 
-  START_MASTER(threading);
-  //if(g.my_rank==0)  printf( "\tdifference levels ...\n" );
-  END_MASTER(thrading);
-    
   // for all but coarsest level
   lx = l;
-  for( i=0; i<1;i++){//g.num_levels-1 ;i++ ){ 
+  for( i=0; i<g.num_levels-1; i++ ){ 
     // set the pointer to the mlmc difference operator
     h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
     estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
     trace += estimate.acc_trace/estimate.sample_size;
-    //If deflation vectors are available
+    // if deflation vectors are available
     if(g.trace_deflation_type[lx->depth] != 3){
-      trace += hutchinson_deflated_direct_term_difference_PRECISION(lx, threading);
+      trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
     }
     lx = lx->next_level;
   }
-  START_MASTER(threading);
-  if(g.my_rank==0)  printf( "\t... done\n" );
-  END_MASTER(thrading);
-   
-  /* START_MASTER(threading);
-  if(g.my_rank==0)  printf( "\tcoarsest level ...\n" );
-  END_MASTER(thrading);
-    
+
   // coarsest level
   // set the pointer to the coarsest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
   estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
   trace += estimate.acc_trace/estimate.sample_size;
-  START_MASTER(threading);
-  if(g.my_rank==0)  printf( "\t... done\n" );
-  END_MASTER(thrading); */
-
-  START_MASTER(threading);
-  if(g.my_rank==0)  printf( "... done\n" );
-  END_MASTER(thrading);
+  // if deflation vectors are available
+  if(g.trace_deflation_type[lx->depth] != 3){
+    trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
+  }
 
   return trace;
 }
 
 
 complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading ){
-  START_MASTER(threading);
-  //if(g.my_rank==0)  printf( "Trace computation via split levels ...\n" );
-  END_MASTER(thrading);
-
   int i;
   complex_PRECISION trace = 0.0;
   struct sample estimate;
@@ -357,7 +371,7 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
     trace += estimate.acc_trace/estimate.sample_size;
     //If deflation vectors are available
     if(g.trace_deflation_type[lx->depth] != 3){
-      trace += hutchinson_deflated_direct_term_PRECISION(lx, threading);
+      trace += hutchinson_deflated_direct_term_PRECISION(lx, h, threading);
     }
     lx = lx->next_level;    
   }
@@ -486,7 +500,7 @@ complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutc
 }
 
 
-// direct term
+// direct term -- TODO : this function is deprecated at the moment
 complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_struct *l, struct Thread *threading){
   int i;
   complex_PRECISION direct_trace = 0.0;
@@ -518,6 +532,7 @@ complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_str
       int start, end;
       gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
       compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+      // FIXME : is there a bug in the following line ?
       vector_PRECISION_minus( l->powerit_PRECISION.vecs_buff1, p->x, l->powerit_PRECISION.vecs_buff1, start, end, l); 
     }
 
@@ -536,44 +551,34 @@ complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_str
 
 
 // TODO : why is there a second function for computing the direct term ?
-complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, struct Thread *threading){
+complex_PRECISION hutchinson_deflated_direct_term_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
   int i, start, end;
   complex_PRECISION direct_trace = 0.0;
-  gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+
   compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
   // 0. create small matrix to store all dot products, let's call it small_T
   complex_PRECISION small_T[l->powerit_PRECISION.nr_vecs];
-    
-  for( i=0; i<l->powerit_PRECISION.nr_vecs;i++ ){
 
+  for( i=0; i<l->powerit_PRECISION.nr_vecs;i++ ){
     // 1. apply the operator on the ith deflation vector
-    // TODO ...
-    vector_PRECISION_copy(p->b, l->powerit_PRECISION.vecs[i], start, end, l);
-    apply_solver_PRECISION( l, threading );
-    vector_PRECISION_copy(l->powerit_PRECISION.vecs_buff1, p->x, start, end, l);  
-      
-    // 2. dot product (do only the diagonal ones)
-    // TODO ...
-    small_T[i] = global_inner_product_PRECISION( l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, l, threading );
+    small_T[i] = h->hutch_compute_one_sample( i, l, h, threading );
 
     // 3. take trace of small_T, store in estimate.direct_trace
-    // TODO ...
     direct_trace += small_T[i];
   }
-  if(g.my_rank==0) printf("\n");
   if(g.my_rank==0) printf("Trace from the direct term : %f +i %f\n", CSPLIT(direct_trace));
   return direct_trace;
 }
 
 
 void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l, struct Thread *threading ){
-  int start, end;
-  gmres_PRECISION_struct* p = get_p_struct_PRECISION( l);
+  int i, start, end;
+  gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
   compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
 
   complex_PRECISION aux[l->powerit_PRECISION.nr_vecs];
-   
-  for( int i = 0; i<l->powerit_PRECISION.nr_vecs; i++ ){
+
+  for( i=0; i<l->powerit_PRECISION.nr_vecs; i++ ){
     aux[i] = global_inner_product_PRECISION(l->powerit_PRECISION.vecs[i], input, p->v_start, p->v_end, l, threading);	
   }
 

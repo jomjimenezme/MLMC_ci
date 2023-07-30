@@ -23,16 +23,16 @@
   void apply_R_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct* l, struct Thread *threading );
   int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading );
 
-  complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, struct Thread *threading);
+  complex_PRECISION hutchinson_deflated_direct_term_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading);
   void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l, struct Thread *threading );
 
   complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_struct *l, struct Thread *threading);
 
-  complex_PRECISION hutchinson_mlmc_difference_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  complex_PRECISION hutchinson_mlmc_difference_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
   complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
   complex_PRECISION hutchinson_deflated_split_orthogonal_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading);
   //complex_PRECISION hutchinson_split_orthogonal( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
-  complex_PRECISION hutchinson_plain_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
  
   int apply_solver_PRECISION( level_struct* l, struct Thread *threading );
   gmres_PRECISION_struct* get_p_struct_PRECISION( level_struct* l );

@@ -81,6 +81,7 @@ void block_powerit_PRECISION_free( level_struct* l, struct Thread* threading ){
 void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading ){
   int i, spec_type=0, depth_bp_op, nr_bp_vecs, nr_bpi_cycles;
   double bp_tol;
+  level_struct *lx;
 
   // specify the following two params in the .ini input file, at different levels:
   // 	dx trace deflation type: 0   // 0 is difference, 1 is non-difference, 2 is split orthogonal, 3 is no deflation
@@ -90,27 +91,29 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
   for( i=0;i<g.num_levels;i++ ){
     if(g.my_rank==0)printf("BPI : level %d, request %d\n", i, g.trace_deflation_type[i]);
 
+    depth_bp_op = i;
+    nr_bp_vecs = g.trace_deflation_nr_vectors[i];
+    bp_tol = g.trace_powerit_solver_tol[i];
+    nr_bpi_cycles = g.trace_powerit_cycles[i];
+
+    lx = get_correct_l_PRECISION( depth_bp_op,l );
+
     // in case no deflation is requested
     if( g.trace_deflation_type[i]==3 ){ continue; }
     switch(g.trace_deflation_type[i]){
       case 0:
-        l->powerit_PRECISION.apply_to_one_vector = powerit_diff_op_PRECISION;
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_diff_op_PRECISION;
         break;
       case 1:
-        l->powerit_PRECISION.apply_to_one_vector = powerit_non_diff_op_PRECISION;
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_non_diff_op_PRECISION;
         break;
       case 2:
-        l->powerit_PRECISION.apply_to_one_vector = powerit_split_op_PRECISION;
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_split_op_PRECISION;
         break;
 
       default:
         error0("Uknown type for operator in block power iteration\n");
     }
-
-    depth_bp_op = i;
-    nr_bp_vecs = g.trace_deflation_nr_vectors[i];
-    bp_tol = g.trace_powerit_solver_tol[i];
-    nr_bpi_cycles = g.trace_powerit_cycles[i];
 
     switch(g.trace_powerit_spectrum_type[i]){
       case 0:
@@ -127,7 +130,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     //		   -- always call this operation with the finest-level l
     //		   -- after calling power iteration, the result is in lx->powerit_PRECISION.vecs, with lx
     //		      the level struct of the chosen level
-    if( depth_bp_op==(g.num_levels-1) && l->powerit_PRECISION.apply_to_one_vector == powerit_diff_op_PRECISION){
+    if( depth_bp_op==(g.num_levels-1) && lx->powerit_PRECISION.apply_to_one_vector == powerit_diff_op_PRECISION){
       error0("There is no difference level operator at the coarsest level\n");
     }
 
@@ -171,6 +174,7 @@ void bp_qr_PRECISION( level_struct* lx, struct Thread* threading ){
 }
 
 
+// this is called in case we have chosen Plain Hutchinson
 void powerit_non_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
   int start, end;
 
@@ -183,6 +187,7 @@ void powerit_non_diff_op_PRECISION( level_struct *l, int i, struct Thread *threa
 }
 
 
+// this is called in case we have chosen Traditional MGMLMC
 void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
   int start, end;    
 
@@ -204,6 +209,8 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
   vector_PRECISION_minus( l->powerit_PRECISION.vecs[i], p->x, l->powerit_PRECISION.vecs_buff2, start, end, l );
 }
 
+
+// this is called in case we have chosen Split Orthogonal MGMLMC
 void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
   // TODO: IMLEMENT BOTH SPLIT OPERATORS??
   int start, end;
@@ -232,7 +239,7 @@ void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threadin
 
 
 void blind_bp_op_PRECISION_apply( level_struct* lx, struct Thread* threading ){
-  // apply gamma5 before either operator
+  // apply gamma5 before any of the operators .. they're all Gamma5-Hermitian
   int i, start, end;
 
   // all the operators that we consider are Gamma5-Hermitian, so, we apply BPI on their

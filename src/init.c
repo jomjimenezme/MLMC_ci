@@ -535,6 +535,8 @@ void method_finalize( level_struct *l ) {
   FREE( g.block_lattice, int*, ls );
   FREE( g.post_smooth_iter, int, ls );
   FREE( g.trace_deflation_type, int, ls );
+  FREE( g.trace_max_iters, int, ls );
+  FREE( g.trace_min_iters, int, ls );
   FREE( g.trace_deflation_nr_vectors, int, ls );
   FREE( g.trace_powerit_solver_tol, double, ls );
   FREE( g.trace_powerit_cycles, int, ls );
@@ -961,6 +963,14 @@ void read_geometry_data( FILE *in, int ls ) {
     save_pt = &(g.trace_deflation_type[i]); g.trace_deflation_type[i] = 3;
     read_parameter( &save_pt, inputstr, "%d", 1, in, _DEFAULT_SET );
 
+    sprintf( inputstr, "d%d trace max iters:", i );
+    save_pt = &(g.trace_max_iters[i]); g.trace_max_iters[i] = 1000;
+    read_parameter( &save_pt, inputstr, "%d", 1, in, _DEFAULT_SET );
+
+    sprintf( inputstr, "d%d trace min iters:", i );
+    save_pt = &(g.trace_min_iters[i]); g.trace_min_iters[i] = 1000;
+    read_parameter( &save_pt, inputstr, "%d", 1, in, _DEFAULT_SET );
+
     // do this only for the finest level, as this is a global quantity
     if ( i==0 ) {
       sprintf( inputstr, "d%d trace op type:", i );
@@ -1291,6 +1301,8 @@ void allocate_for_global_struct_after_read_global_info( int ls ) {
   MALLOC( g.block_lattice[0], int, 4*ls );
   MALLOC( g.post_smooth_iter, int, ls );
   MALLOC( g.trace_deflation_type, int, ls );
+  MALLOC( g.trace_max_iters, int, ls );
+  MALLOC( g.trace_min_iters, int, ls );
   MALLOC( g.trace_deflation_nr_vectors, int, ls );
   MALLOC( g.trace_powerit_solver_tol, double, ls );
   MALLOC( g.trace_powerit_cycles, int, ls );

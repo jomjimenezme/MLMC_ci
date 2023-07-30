@@ -131,8 +131,9 @@ int main( int argc, char **argv ) {
 
     // pre-setting some values for the Hutchinson struct
     {
-      l.h_double.max_iters = 10;
-      l.h_double.min_iters = 10;
+      //l.h_double.max_iters = 1000;
+      //l.h_double.min_iters = 1000;
+
       l.h_double.trace_tol = 1.0e-4;
       hutchinson_diver_double_init( &l, &threading );  
       hutchinson_diver_double_alloc( &l, &threading );
@@ -181,16 +182,10 @@ int main( int argc, char **argv ) {
       if(g.my_rank==0) printf("Using (traditional) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
 
-      double t_mlmc0, t_mlmc1;
-      t_mlmc0 = MPI_Wtime();
       trace = mlmc_hutchinson_driver_double( &l, &threading );
-      t_mlmc1 =MPI_Wtime();
-      START_MASTER(threadingx)
-      if(g.my_rank==0)printf("Time taken by (traditional) MGMLMC to compute the trace %f\n", t_mlmc1-t_mlmc0);
-      END_MASTER(threadingx)
-      fflush(0);
 
       START_MASTER(threadingx)
+      if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (traditional) MGMLMC = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
     } else if ( op_type==2 ) {
