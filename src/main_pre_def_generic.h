@@ -281,7 +281,7 @@ typedef struct {
   } profiling_PRECISION_struct;
 
   typedef struct {
-    int nr_vecs, nr_cycles,spec_type;
+    int nr_vecs, nr_cycles, spec_type;
     double bp_tol, tol_buff;
     vector_PRECISION* vecs;
     vector_PRECISION vecs_buff1;

@@ -92,7 +92,7 @@ int main( int argc, char **argv ) {
     setup_threading(&threading, commonthreaddata, &l);
     setup_no_threading(no_threading, &l);
 
-    // initial phse of AMG
+    // initial phase of AMG
     double t_setup0, t_update0, t_setup1, t_update1;
     t_setup0 = MPI_Wtime();
     method_setup( NULL, &l, &threading );
@@ -173,6 +173,7 @@ int main( int argc, char **argv ) {
       trace = hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
+      if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from deflated plain Hutchinson = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
     } else if ( op_type==0 ) {

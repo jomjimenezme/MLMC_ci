@@ -1,9 +1,7 @@
 #ifndef HUTCHINSON_PRECISION_HEADER
   #define HUTCHINSON_PRECISION_HEADER
 
-
   struct Thread;
-
 
   complex_PRECISION mlmc_hutchinson_diver_PRECISION( level_struct *l, struct Thread *threading );
 

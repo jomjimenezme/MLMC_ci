@@ -326,7 +326,6 @@
     hutchinson_float_struct h_float;
     hutchinson_double_struct h_double;
 
-
     // communication
     MPI_Request *reqs;
     int parent_rank, idle, neighbor_rank[8], num_processes, num_processes_dir[4];
@@ -371,7 +370,8 @@
     // next coarser level
     struct level_struct *next_level;
 
-    powerit_double_struct powerit;
+    powerit_double_struct powerit_double;
+    powerit_float_struct powerit_float;
 
 #if defined(GCRODR) || defined(POLYPREC)
     // 'bool', if on H will be copied

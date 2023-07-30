@@ -703,7 +703,10 @@ enum {_SOLVE, _SOLVE_SQ, _SOLVE_SQ_ODD, _SOLVE_SQ_EVEN, _PRECOND, _OPERATOR, _RE
 static inline void DDalphaAMG_driver( double *vector1_out, double *vector1_in, double *vector2_out, double *vector2_in, double tol, DDalphaAMG_status *mg_status, int _TYPE ) {
   
   int t, z, y, x, i, j, k, mu, *ll = l.local_lattice, *gl=l.global_lattice, sl[4], precision_changed;
-  complex_double twisted_bc, tmp1, tmp2;
+  complex_double twisted_bc, tmp1;
+#ifdef HAVE_TM1p1
+  complex_double tmp2;
+#endif
   double phase[4] = {_COMPLEX_double_ZERO, _COMPLEX_double_ZERO, _COMPLEX_double_ZERO, _COMPLEX_double_ZERO}, vmin=1, vmax=EPS_float, vtmp, nrhs, nrhs2;
   gmres_double_struct *p = g.mixed_precision==2?&(g.p_MP.dp):&(g.p);
   vector_double vb=p->b, rhs = p->b;
@@ -1095,7 +1098,10 @@ static inline void DDalphaAMG_ms_driver( double **vector1_out, double *vector1_i
                                          double  *tol, DDalphaAMG_status *mg_status, int _TYPE ) 
 {
   int t, z, y, x, i, j, k, n, mu, *ll = l.local_lattice, *gl=l.global_lattice, sl[4], precision_changed;
-  complex_double twisted_bc, tmp1, tmp2;
+  complex_double twisted_bc, tmp1;
+#ifdef HAVE_TM1p1
+  complex_double tmp2;
+#endif
   double phase[4] = {_COMPLEX_double_ZERO, _COMPLEX_double_ZERO, _COMPLEX_double_ZERO, _COMPLEX_double_ZERO},
     vmin=1, vmax=EPS_float, vtmp, nrhs, nrhs2;
   gmres_double_struct *p = g.mixed_precision==2?&(g.p_MP.dp):&(g.p);

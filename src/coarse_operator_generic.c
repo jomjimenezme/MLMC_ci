@@ -121,7 +121,9 @@ void coarse_operator_PRECISION_setup( vector_PRECISION *V, level_struct *l ) {
 
 void coarse_operator_PRECISION_setup_finalize( level_struct *l, struct Thread *threading ) {
 
+#if defined(HAVE_TM) || defined(HAVE_TM1p1)
   int block_size = l->next_level->block_size;
+#endif
   
   l->next_level->op_PRECISION.m0 = l->s_PRECISION.op.m0;
 #ifdef HAVE_TM    
@@ -400,17 +402,22 @@ void coarse_self_couplings_PRECISION( vector_PRECISION eta, vector_PRECISION phi
 
   int num_eig_vect = l->num_parent_eig_vect, 
     vector_size = l->num_lattice_site_var,
-    clover_size = (2*num_eig_vect*num_eig_vect+num_eig_vect), 
-    block_size = (num_eig_vect*num_eig_vect+num_eig_vect);
+    clover_size = (2*num_eig_vect*num_eig_vect+num_eig_vect);
 
   coarse_self_couplings_clover_PRECISION( eta+start*vector_size, phi+start*vector_size,
                                           op->clover+start*clover_size, (end-start)*vector_size, l );
+
+#if defined(HAVE_TM) || defined(HAVE_TM1p1)
+  int block_size = (num_eig_vect*num_eig_vect+num_eig_vect);
+#endif
+
 #ifdef HAVE_TM // tm_term
   if (op->mu + op->mu_odd_shift != 0.0 || op->mu + op->mu_even_shift != 0.0 )
     coarse_add_anti_block_diagonal_PRECISION( eta+start*vector_size, phi+start*vector_size, 
                                               op->tm_term+start*block_size, (end-start)*vector_size, l );
 #endif
 #ifdef HAVE_TM1p1 //eps_term
+  
   if ( g.n_flavours == 2 &&
        ( op->epsbar != 0 || op->epsbar_ig5_odd_shift != 0 || op->epsbar_ig5_odd_shift != 0 ) )
     coarse_add_doublet_coupling_PRECISION( eta+start*vector_size, phi+start*vector_size, 
