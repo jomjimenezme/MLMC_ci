@@ -218,8 +218,24 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 }
 
 
-// big TODO : implement this
-void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *threading ){}
+// big TODO : Generalize this
+void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
+  int start, end;
+
+  gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+  compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
+  
+ //Restrict. Prolongate, Difference, Solve, R, P, Difference.
+
+  apply_R_PRECISION( l->powerit_PRECISION.vecs_buff1, l->powerit_PRECISION.vecs[i], l, threading );
+  apply_P_PRECISION( l->powerit_PRECISION.vecs_buff2, l->powerit_PRECISION.vecs_buff1, l, threading );
+  vector_PRECISION_minus(  p->b, l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs_buff2, start, end, l );
+  apply_solver_powerit_PRECISION( l, threading );
+  apply_R_PRECISION( l->powerit_PRECISION.vecs_buff1, p->x, l, threading );
+  apply_P_PRECISION( l->powerit_PRECISION.vecs_buff2, l->powerit_PRECISION.vecs_buff1, l, threading );
+  vector_PRECISION_minus(  l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs_buff2, start, end, l );
+
+}
 
 
 // the term tr( R A_{l}^{-1} P - A_{l+1}^{-1} )
