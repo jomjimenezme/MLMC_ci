@@ -158,15 +158,18 @@ int main( int argc, char **argv ) {
     complex_double trace;
 
     int op_type;
-    if ( g.trace_deflation_type[0]<3 ) {
-      if ( g.trace_deflation_type[0]!=g.trace_op_type )
+    if ( g.trace_deflation_type[0]==1 || g.trace_deflation_type[0]==2 ) {
+      if ( g.trace_deflation_type[0] != g.trace_op_type )
         if(g.my_rank==0) warning("CAREFUL : you are using different operators for BPI and the trace method");
-      op_type = g.trace_deflation_type[0];
+    } else if ( g.trace_deflation_type[0]>=3 && g.trace_deflation_type[0]<=5 ) {
+      if ( g.trace_op_type<3 || g.trace_op_type>5 ) {
+        if(g.my_rank==0) warning("CAREFUL : you are using different operators for BPI and the trace method");
+      }
     }
-    else { op_type = g.trace_op_type; }
+    op_type = g.trace_op_type;
 
     if(g.my_rank==0) printf("\n");
-    if ( op_type==1 ) {
+    if ( op_type==2 ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using deflated plain Hutchinson for computing the trace\n");
       END_MASTER(threadingx)
@@ -177,7 +180,7 @@ int main( int argc, char **argv ) {
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from deflated plain Hutchinson = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
-    } else if ( op_type==0 ) {
+    } else if ( op_type==1 ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (traditional) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
@@ -188,7 +191,7 @@ int main( int argc, char **argv ) {
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (traditional) MGMLMC = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
-    } else if ( op_type==2 ) {
+    } else if ( op_type>=3 && op_type<=5 ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (split) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
@@ -196,12 +199,14 @@ int main( int argc, char **argv ) {
       trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
+      if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (split) MGMLMC = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
     }
 
     hutchinson_diver_double_free( &l, &threading );
-    block_powerit_double_free( &l, &threading );
+    // FIXME : uncommenting this gives seg fault
+    //block_powerit_double_free( &l, &threading );
   }
 
   finalize_common_thread_data(commonthreaddata);

@@ -99,16 +99,24 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     lx = get_correct_l_PRECISION( depth_bp_op,l );
 
     // in case no deflation is requested
-    if( g.trace_deflation_type[i]==3 ){ continue; }
+    if( g.trace_deflation_type[i] == 0 ){ continue; }
     switch(g.trace_deflation_type[i]){
-      case 0:
+      case 1:
         lx->powerit_PRECISION.apply_to_one_vector = powerit_diff_op_PRECISION;
         break;
-      case 1:
+      case 2:
         lx->powerit_PRECISION.apply_to_one_vector = powerit_non_diff_op_PRECISION;
         break;
-      case 2:
-        lx->powerit_PRECISION.apply_to_one_vector = powerit_split_op_PRECISION;
+      case 3:
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_split_full_rank_op_PRECISION;
+        break;
+      case 4:
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_split_orthog_op_PRECISION;
+        break;
+      case 5:
+        // big TODO !
+        error0("under construction!\n");
+        lx->powerit_PRECISION.apply_to_one_vector = powerit_split_orthog_op_PRECISION;
         break;
 
       default:
@@ -210,20 +218,24 @@ void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading
 }
 
 
-// this is called in case we have chosen Split Orthogonal MGMLMC
-void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
-  // TODO: IMLEMENT BOTH SPLIT OPERATORS??
+// big TODO : implement this
+void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *threading ){}
+
+
+// the term tr( R A_{l}^{-1} P - A_{l+1}^{-1} )
+// this is called in case we have chosen Split Full Rank MGMLMC
+void powerit_split_full_rank_op_PRECISION( level_struct *l, int i, struct Thread *threading ){
   int start, end;
 
   gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( l );
   compute_core_start_end( p->v_start, p->v_end, &start, &end, l, threading );
-  
+
   apply_P_PRECISION( p->b, l->powerit_PRECISION.vecs[i], l, threading );
   apply_solver_powerit_PRECISION( l, threading );
   apply_R_PRECISION( l->powerit_PRECISION.vecs_buff2, p->x, l, threading );
 
   level_struct* lxc = l->next_level;
-  gmres_PRECISION_struct* pxc = get_p_struct_PRECISION_2(lxc);
+  gmres_PRECISION_struct* pxc = get_p_struct_PRECISION_2( lxc );
   compute_core_start_end( 0, lxc->inner_vector_size, &start, &end, lxc, threading );
 
   vector_PRECISION_copy( pxc->b, l->powerit_PRECISION.vecs[i], start, end, lxc );

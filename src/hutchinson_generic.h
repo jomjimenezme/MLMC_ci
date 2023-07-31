@@ -14,10 +14,6 @@
   complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading );
   complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading );
   complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thread *threading );
-
-  // different operators for Hutchinson and block power iteration
-  complex_PRECISION hutchinson_split_orthogonal_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
-  
   
   void apply_P_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct* l, struct Thread *threading );
   void apply_R_PRECISION( vector_PRECISION out, vector_PRECISION in, level_struct* l, struct Thread *threading );
@@ -28,10 +24,11 @@
 
   complex_PRECISION hutchinson_deflated_direct_term_difference_PRECISION(level_struct *l, struct Thread *threading);
 
+  // different operators for Hutchinson and block power iteration
+  complex_PRECISION hutchinson_split_orthogonal_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
   complex_PRECISION hutchinson_mlmc_difference_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
-  complex_PRECISION hutchinson_split_intermediate_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
-  complex_PRECISION hutchinson_deflated_split_orthogonal_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading);
-  //complex_PRECISION hutchinson_split_orthogonal( level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  complex_PRECISION hutchinson_split_intermediate_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+
   complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
  
   int apply_solver_PRECISION( level_struct* l, struct Thread *threading );

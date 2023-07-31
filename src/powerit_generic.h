@@ -11,7 +11,8 @@
 
   void powerit_non_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading );
   void powerit_diff_op_PRECISION( level_struct *l, int i, struct Thread *threading );
-  void powerit_split_op_PRECISION( level_struct *l, int i, struct Thread *threading );
+  void powerit_split_full_rank_op_PRECISION( level_struct *l, int i, struct Thread *threading );
+  void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *threading );
 
   int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading );
 
