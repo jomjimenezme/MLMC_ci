@@ -233,8 +233,7 @@ void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *t
   apply_solver_powerit_PRECISION( l, threading );
   apply_R_PRECISION( l->powerit_PRECISION.vecs_buff1, p->x, l, threading );
   apply_P_PRECISION( l->powerit_PRECISION.vecs_buff2, l->powerit_PRECISION.vecs_buff1, l, threading );
-  vector_PRECISION_minus(  l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs[i], l->powerit_PRECISION.vecs_buff2, start, end, l );
-
+  vector_PRECISION_minus(  l->powerit_PRECISION.vecs[i], p->x, l->powerit_PRECISION.vecs_buff2, start, end, l );
 }
 
 
