@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --job-name=28-8_192x48to3
+#SBATCH --nodes=54
+#SBATCH --ntasks-per-node=48
+#SBATCH --cpus-per-task=1
+#SBATCH --output=mpi_192-out.%j
+#SBATCH --error=mpi_192-err.%j
+#SBATCH --time=72:00:00
+
+1296
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+module load 2022a
+module load GCC/11.3.0
+module load OpenMPI/4.1.4
+
+
+
+
+ 
+date
+make clean
+make -j 64
+
+
+
+. run -i "192x96to3.ini"
+date
