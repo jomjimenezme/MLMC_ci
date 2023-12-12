@@ -57,6 +57,8 @@ void vector_PRECISION_define_random( vector_PRECISION phi, int start, int end, l
 
 
 void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start, int end, level_struct *l ) {
+
+  // TODO : use l->use_dilution to implement dilution or not
   
   int thread = omp_get_thread_num();
   if(thread == 0 && start != end)
