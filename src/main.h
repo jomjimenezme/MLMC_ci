@@ -374,6 +374,7 @@
     powerit_float_struct powerit_float;
 
     int use_dilution;
+    int dil_spin;
 
 #if defined(GCRODR) || defined(POLYPREC)
     // 'bool', if on H will be copied

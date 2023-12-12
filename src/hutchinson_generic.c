@@ -62,7 +62,7 @@ void hutchinson_diver_PRECISION_free( level_struct *l, struct Thread *threading 
 
 
 void rademacher_create_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, int type, struct Thread *threading ){
-  if ( l->depth==0 && type==0 ) { l->use_dilution = 1; }
+  if ( g.use_dilution[l->depth]==1 && l->depth==0 && type==0 ) { l->use_dilution = 1; }
   else { l->use_dilution = 0; }
 
   if( type==0 ){
@@ -334,6 +334,7 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
     if ( i==0 && g.use_dilution[i]==1 ) { nr_dil_colors = 2; }
 
     for ( j=0;j<nr_dil_colors;j++ ) {
+      lx->dil_spin = j;
       // set the pointer to the mlmc difference operator
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
@@ -342,8 +343,8 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
       if(g.trace_deflation_type[lx->depth] != 0){
         trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
       }
-      lx = lx->next_level;
     }
+    lx = lx->next_level;
   }
 
   // coarsest level
@@ -368,6 +369,7 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   level_struct* lx=0;
 
   // for all but coarsest level
+  if ( g.my_rank==0 ) printf( "\nFull rank :\n" );
   lx = l;
   for( i=0; i<g.num_levels-1 ;i++ ){  
     // set the pointer to the split full rank operator
@@ -385,12 +387,14 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   }
 
   // for all but coarsest level
+  if ( g.my_rank==0 ) printf( "\nOrthogonal :\n" );
   lx = l;
   for( i=0; i<g.num_levels-1;i++ ){
     int nr_dil_colors = 1;
     if ( i==0 && g.use_dilution[i]==1 ) { nr_dil_colors = 2; }
 
     for ( j=0;j<nr_dil_colors;j++ ) {
+      lx->dil_spin = j;
       // set the pointer to the split orthogonal operator
       h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
@@ -402,11 +406,12 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
           trace += hutchinson_deflated_direct_term_PRECISION(lx, h, threading);
         }
       }
-      lx = lx->next_level; 
     }
+    lx = lx->next_level;
   }
 
   // coarsest level
+  if ( g.my_rank==0 ) printf( "\nCoarsest :\n" );
   // set the pointer to the coarsest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
   estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
