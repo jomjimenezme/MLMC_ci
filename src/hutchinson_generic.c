@@ -223,10 +223,17 @@ complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *t
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
   level_struct* lx = l;
 
+  int j,nr_dil_colors=1;
+  if ( g.use_dilution[0]==1 ) { nr_dil_colors = 2; }
+
   // set the pointer to the finest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-  estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-  trace += estimate.acc_trace/estimate.sample_size;
+  for ( j=0;j<nr_dil_colors;j++ ) {
+    lx->dil_spin = j;
+
+    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+    trace += estimate.acc_trace/estimate.sample_size;
+  }
 
   // if deflation vectors are available
   if(g.trace_deflation_type[l->depth] != 0){
@@ -339,10 +346,10 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
       h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
       trace += estimate.acc_trace/estimate.sample_size;
-      // if deflation vectors are available
-      if(g.trace_deflation_type[lx->depth] != 0){
-        trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
-      }
+    }
+    // if deflation vectors are available
+    if(g.trace_deflation_type[lx->depth] != 0){
+      trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
     }
     lx = lx->next_level;
   }
@@ -400,11 +407,11 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
       estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
       trace += estimate.acc_trace/estimate.sample_size;
 
-      // if deflation vectors are available
-      if( g.trace_deflation_type[lx->depth] != 0 ){
-        if( g.trace_deflation_type[lx->depth]==4 || g.trace_deflation_type[lx->depth]==5 ){
-          trace += hutchinson_deflated_direct_term_PRECISION(lx, h, threading);
-        }
+    }
+    // if deflation vectors are available
+    if( g.trace_deflation_type[lx->depth] != 0 ){
+      if( g.trace_deflation_type[lx->depth]==4 || g.trace_deflation_type[lx->depth]==5 ){
+        trace += hutchinson_deflated_direct_term_PRECISION(lx, h, threading);
       }
     }
     lx = lx->next_level;
