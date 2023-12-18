@@ -63,7 +63,10 @@ void hutchinson_diver_PRECISION_free( level_struct *l, struct Thread *threading 
 
 void rademacher_create_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, int type, struct Thread *threading ){
   if ( g.use_dilution[l->depth]==1 && l->depth==0 && type==0 ) { l->use_dilution = 1; }
-  else { l->use_dilution = 0; }
+  else {
+    l->use_dilution = 0;
+    if ( l->level>0 ) l->next_level->use_dilution = 0;
+  }
 
   if( type==0 ){
     START_MASTER(threading)
