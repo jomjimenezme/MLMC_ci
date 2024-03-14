@@ -16,6 +16,6 @@
 
   int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading );
   
-  void get_rayleight_quotients(level_struct* lx, struct Thread* threading );
+  void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threading );
 
 #endif
