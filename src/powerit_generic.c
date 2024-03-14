@@ -144,6 +144,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
 
     block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
     block_powerit_PRECISION( depth_bp_op, l, threading );
+    get_rayleight_quotients_PRECISION(l, threading);
   }
 }
 
@@ -335,6 +336,51 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
 }
 
 
+void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threading ){
+  
+  int i, start, end;
+  complex_PRECISION rq = 0.0; PRECISION norm =0.0;
+  vector_PRECISION* vecs_buff;
+  
+  vecs_buff = NULL;
+  PUBLIC_MALLOC( vecs_buff, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+  vecs_buff[0] = NULL;  
+  PUBLIC_MALLOC( vecs_buff[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
+  
+  START_MASTER(threading)
+  for( i=1;i<lx->powerit_PRECISION.nr_vecs;i++ ){
+    vecs_buff[i] = vecs_buff[0] + i*lx->vector_size;
+  }
+  END_MASTER(threading)
+  SYNC_CORES(threading)
+  
+  
+  gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
+  compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
+  
+  
+  // backup of deflation vectors
+  for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
+    vector_PRECISION_copy( vecs_buff[i], lx->powerit_PRECISION.vecs[i], start, end, lx );
+  }
+  
+  // apply the operator
+  blind_bp_op_PRECISION_apply( lx, threading );
+
+  for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
+    rq = global_inner_product_PRECISION( vecs_buff[i], lx->powerit_PRECISION.vecs[i],  px->v_start, px->v_end, lx, threading );
+    norm = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
+    rq /= norm; 
+
+  // Restore Backup
+    vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
+    
+    if(g.my_rank==0)
+        printf("---------\t %f + i%f\n", rq);
+  }
+    
+  PUBLIC_FREE( vecs_buff[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
+}
 // ------------------------------------------------------------------------------------------
 
 

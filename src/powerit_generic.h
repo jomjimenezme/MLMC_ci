@@ -15,5 +15,7 @@
   void powerit_split_orthog_op_PRECISION( level_struct *l, int i, struct Thread *threading );
 
   int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading );
+  
+  void get_rayleight_quotients(level_struct* lx, struct Thread* threading );
 
 #endif
