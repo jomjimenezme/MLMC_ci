@@ -42,11 +42,16 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int
   PUBLIC_MALLOC( lx->powerit_PRECISION.gs_buffer, complex_PRECISION, 2*lx->powerit_PRECISION.nr_vecs );
 
   lx->powerit_PRECISION.vecs = NULL;
+  lx->powerit_PRECISION.U= NULL;
   PUBLIC_MALLOC( lx->powerit_PRECISION.vecs, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+  PUBLIC_MALLOC( lx->powerit_PRECISION.U, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
   lx->powerit_PRECISION.vecs[0] = NULL;
+  lx->powerit_PRECISION.U[0] = NULL;
   PUBLIC_MALLOC( lx->powerit_PRECISION.vecs[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
+  PUBLIC_MALLOC( lx->powerit_PRECISION.U[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
   for( i=1;i<lx->powerit_PRECISION.nr_vecs;i++ ){
     lx->powerit_PRECISION.vecs[i] = lx->powerit_PRECISION.vecs[0] + i*lx->vector_size;
+    lx->powerit_PRECISION.U[i] = lx->powerit_PRECISION.vecs[0] + i*lx->vector_size;
   }
 
   lx->powerit_PRECISION.vecs_buff1 = NULL;
@@ -55,6 +60,9 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int
   PUBLIC_MALLOC( lx->powerit_PRECISION.vecs_buff2, complex_PRECISION, lx->vector_size );
   lx->powerit_PRECISION.vecs_buff3 = NULL;
   PUBLIC_MALLOC( lx->powerit_PRECISION.vecs_buff3, complex_PRECISION, lx->vector_size );
+  
+  
+  PUBLIC_MALLOC( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
 }
 
 
@@ -74,6 +82,8 @@ void block_powerit_PRECISION_free( level_struct* l, struct Thread* threading ){
     PUBLIC_FREE( lx->powerit_PRECISION.vecs_buff2, complex_PRECISION, lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.vecs_buff3, complex_PRECISION, lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.gs_buffer, complex_PRECISION, 2*lx->powerit_PRECISION.nr_vecs );
+    
+    PUBLIC_FREE( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
   }
 }
 
@@ -145,6 +155,8 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
     block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
     block_powerit_PRECISION( depth_bp_op, l, threading );
     get_rayleight_quotients_PRECISION(l, threading);
+    compute_U_from_V_PRECISION( l,threading );
+
   }
 }
 
@@ -335,11 +347,43 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
   return nr_iters;
 }
 
+// U = \gamma_5 V Sign (Lambda)
+void compute_U_from_V_PRECISION( level_struct* lx, struct Thread* threading ){
+  
+  int i, start, end;
+  complex_PRECISION* rq  = lx->powerit_PRECISION.SV;
+  gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
+  compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
+
+  PRECISION sign_lambda;
+  for (i = 0; i< lx->powerit_PRECISION.nr_vecs; i++){
+    if( lx->depth==0 ){
+        gamma5_PRECISION( lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.vecs[i], lx, threading );
+    }
+    else{
+      int startg5, endg5;
+      compute_core_start_end_custom(0, lx->inner_vector_size, &startg5, &endg5, lx, threading, lx->num_lattice_site_var );
+      coarse_gamma5_PRECISION( lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.vecs[i], startg5, endg5, lx );
+    }
+    
+    if( signbit(creal(rq[i])) ){
+      sign_lambda = -1.0;
+      vector_PRECISION_scale(lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.U[i], sign_lambda, start, end, lx );
+      if(g.my_rank==0)
+          printf("Negative\n");
+    }else{
+     if(g.my_rank==0)
+          printf("Positive\n");   
+    }
+
+  }
+
+}
 
 void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threading ){
   
   int i, start, end;
-  complex_PRECISION rq = 0.0; PRECISION norm =0.0;
+  complex_PRECISION rq = 0.0; PRECISION norm = 0.0;
   vector_PRECISION* vecs_buff;
   
   vecs_buff = NULL;
@@ -371,7 +415,8 @@ void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threadin
     rq = global_inner_product_PRECISION( vecs_buff[i], lx->powerit_PRECISION.vecs[i],  px->v_start, px->v_end, lx, threading );
     norm = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
     rq /= norm; 
-
+    
+    lx->powerit_PRECISION.SV[i] = rq;
   // Restore Backup
     vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
     

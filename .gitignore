@@ -10,3 +10,4 @@ local_coarsest_mat.mat
 local_coarsest_mat.txt
 
 *.txt
+*swp

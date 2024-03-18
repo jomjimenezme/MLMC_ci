@@ -274,6 +274,8 @@ typedef struct {
     int nr_vecs, nr_cycles, spec_type;
     double bp_tol, tol_buff;
     vector_PRECISION* vecs;
+    vector_PRECISION* U;
+    complex_PRECISION* SV;
     vector_PRECISION vecs_buff1;
     vector_PRECISION vecs_buff2;
     vector_PRECISION vecs_buff3;
