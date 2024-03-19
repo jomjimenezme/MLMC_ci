@@ -158,7 +158,6 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
         block_powerit_PRECISION( depth_bp_op, l, threading );
     }else{ //Multigrid deflation
-        level_struct* lxc = lx->next_level;
         //We need to allocate the memory on both finest and coarser level
         block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
         block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op+1, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
@@ -168,8 +167,8 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         //and then call the method from the coarser level
         block_powerit_PRECISION( depth_bp_op+1, l, threading );
         //and compute the U vectors (also in coarser)
-        get_rayleight_quotients_PRECISION(lxc, threading);
-        compute_U_from_V_PRECISION( lxc,threading );
+        get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
+        compute_U_from_V_PRECISION( depth_bp_op+1, l, threading );
     }
     
   }
@@ -363,9 +362,10 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
 }
 
 // U = \gamma_5 V Sign (Lambda)
-void compute_U_from_V_PRECISION( level_struct* lx, struct Thread* threading ){
+void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* threading ){
   
   int i, start, end;
+  level_struct* lx = get_correct_l_PRECISION( depth_bp_op,l );
   complex_PRECISION* rq  = lx->powerit_PRECISION.SV;
   gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
   compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
@@ -395,9 +395,10 @@ void compute_U_from_V_PRECISION( level_struct* lx, struct Thread* threading ){
 
 }
 
-void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threading ){
+void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct Thread* threading ){
   
   int i, start, end;
+  level_struct* lx = get_correct_l_PRECISION( depth_bp_op,l );
   complex_PRECISION rq = 0.0; PRECISION norm = 0.0;
   vector_PRECISION* vecs_buff;
   
