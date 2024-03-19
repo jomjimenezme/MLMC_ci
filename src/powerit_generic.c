@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-// aux functions
+// aux functions: from finest level, I get the level at desired depth
 level_struct *get_correct_l_PRECISION( int depth_bp_op, level_struct* l ){
   int i;
 
@@ -15,7 +15,7 @@ level_struct *get_correct_l_PRECISION( int depth_bp_op, level_struct* l ){
 }
 
 // FIXME : hacked this function a bit to avoid compiler warnings
-gmres_PRECISION_struct* get_p_struct_PRECISION_2( level_struct* l ){
+gmres_PRECISION_struct* get_p_struct_PRECISION_2( level_struct* l ){ 
   if( l->depth==0 ){
     if ( strcmp("PRECISION","float")==0 ) { return &(l->p_PRECISION); }
     else { return (gmres_PRECISION_struct*)&(g.p); }
@@ -29,10 +29,9 @@ gmres_PRECISION_struct* get_p_struct_PRECISION_2( level_struct* l ){
 
 void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int nr_vecs, int nr_bpi_cycles, double bp_tol, level_struct* l, struct Thread* threading ){
   int i;
-
   // access l at the right level
   level_struct* lx = get_correct_l_PRECISION( depth_bp_op,l );
-
+  
   lx->powerit_PRECISION.nr_vecs = nr_vecs;
   lx->powerit_PRECISION.bp_tol = bp_tol;
   lx->powerit_PRECISION.nr_cycles = nr_bpi_cycles;
@@ -128,6 +127,9 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         error0("under construction!\n");
         lx->powerit_PRECISION.apply_to_one_vector = powerit_split_orthog_op_PRECISION;
         break;
+      case 6: //needed: non-diff operator at the coarser
+        lx->next_level->powerit_PRECISION.apply_to_one_vector = powerit_non_diff_op_PRECISION;
+        break;
 
       default:
         error0("Uknown type for operator in block power iteration\n");
@@ -152,11 +154,24 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
       error0("There is no difference level operator at the coarsest level\n");
     }
 
-    block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
-    block_powerit_PRECISION( depth_bp_op, l, threading );
-    get_rayleight_quotients_PRECISION(l, threading);
-    compute_U_from_V_PRECISION( l,threading );
-
+    if(g.trace_deflation_type[i] != 6){ // same for all methods except multig. def.
+        block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
+        block_powerit_PRECISION( depth_bp_op, l, threading );
+    }else{ //Multigrid deflation
+        level_struct* lxc = lx->next_level;
+        //We need to allocate the memory on both finest and coarser level
+        block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
+        block_powerit_PRECISION_init_and_alloc( spec_type, depth_bp_op+1, nr_bp_vecs, nr_bpi_cycles, bp_tol, l, threading );
+        
+        if(g.my_rank==0)
+          printf("Doing BPI at depth %d \n", depth_bp_op+1);
+        //and then call the method from the coarser level
+        block_powerit_PRECISION( depth_bp_op+1, l, threading );
+        //and compute the U vectors (also in coarser)
+        get_rayleight_quotients_PRECISION(lxc, threading);
+        compute_U_from_V_PRECISION( lxc,threading );
+    }
+    
   }
 }
 

@@ -16,6 +16,7 @@
 
   int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading );
   
-  void get_rayleight_quotients_PRECISION(level_struct* lx, struct Thread* threading );
+  void get_rayleight_quotients_PRECISION(level_struct* l, struct Thread* threading );
+  void compute_U_from_V_PRECISION( level_struct* l, struct Thread* threading );
 
 #endif
