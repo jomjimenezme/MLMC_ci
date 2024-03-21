@@ -50,7 +50,7 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int
   PUBLIC_MALLOC( lx->powerit_PRECISION.U[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
   for( i=1;i<lx->powerit_PRECISION.nr_vecs;i++ ){
     lx->powerit_PRECISION.vecs[i] = lx->powerit_PRECISION.vecs[0] + i*lx->vector_size;
-    lx->powerit_PRECISION.U[i] = lx->powerit_PRECISION.vecs[0] + i*lx->vector_size;
+    lx->powerit_PRECISION.U[i] = lx->powerit_PRECISION.U[0] + i*lx->vector_size;
   }
 
   lx->powerit_PRECISION.vecs_buff1 = NULL;
@@ -62,6 +62,8 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int
   
   
   PUBLIC_MALLOC( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
+  
+  lx->powerit_PRECISION.M = malloc(lx->powerit_PRECISION.nr_vecs * lx->powerit_PRECISION.nr_vecs * sizeof(complex_PRECISION));
 }
 
 
@@ -77,12 +79,15 @@ void block_powerit_PRECISION_free( level_struct* l, struct Thread* threading ){
 
     PUBLIC_FREE( lx->powerit_PRECISION.vecs[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.vecs, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+    PUBLIC_FREE( lx->powerit_PRECISION.U, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+
     PUBLIC_FREE( lx->powerit_PRECISION.vecs_buff1, complex_PRECISION, lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.vecs_buff2, complex_PRECISION, lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.vecs_buff3, complex_PRECISION, lx->vector_size );
     PUBLIC_FREE( lx->powerit_PRECISION.gs_buffer, complex_PRECISION, 2*lx->powerit_PRECISION.nr_vecs );
     
     PUBLIC_FREE( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
+    free(lx->powerit_PRECISION.M);
   }
 }
 
@@ -169,12 +174,75 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         //and compute the U vectors (also in coarser)
         get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
         compute_U_from_V_PRECISION( depth_bp_op+1, l, threading );
+        matrix_computation_PRECISION(l->next_level, threading);
     }
     
   }
 }
 
 
+void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
+  int i, j;
+  int k = lx->powerit_PRECISION.nr_vecs; //3
+  
+  gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( lx );
+  
+  //allocation of k buffer vectors
+  vector_PRECISION* vec_buffer = NULL;
+  PUBLIC_MALLOC( vec_buffer, complex_PRECISION*, k );
+  vec_buffer[0] = NULL;
+  PUBLIC_MALLOC( vec_buffer[0], complex_PRECISION, k*lx->vector_size );
+  for( i=1; i<k; i++ ){
+    vec_buffer[i] = vec_buffer[0] + i*lx->vector_size;
+  }
+  
+  //gamma_5 A V_c
+  for( i=0; i<k; i++){
+    apply_operator_PRECISION( vec_buffer[i], lx->powerit_PRECISION.vecs[i], p, lx, threading );
+    if( lx->depth==0 ){
+        gamma5_PRECISION(  vec_buffer[i],  vec_buffer[i], lx, threading );
+    }
+    else{
+      int startg5, endg5;
+      compute_core_start_end_custom(0, lx->inner_vector_size, &startg5, &endg5, lx, threading, lx->num_lattice_site_var );
+      coarse_gamma5_PRECISION(  vec_buffer[i],  vec_buffer[i], startg5, endg5, lx );
+    }
+        
+  }
+  //TODO: Dada type correct? + LAPACK_COL_MAJOR vs ROW
+  complex_PRECISION *M = lx->powerit_PRECISION.M;
+  //M = U^* gamma_5 A V_c
+  for( i=0; i<k; i++){
+    for( j=0; j<k; j++){   
+       M[i*k + j] = global_inner_product_PRECISION(lx->powerit_PRECISION.U[i], vec_buffer[j], p->v_start, p->v_end, lx, threading);
+    }
+  }
+  /*//Example Matrix
+    M[0] = 1;    M[1] = 0;    M[2] = 4;     // -5   0   -2
+    M[3] = 1;    M[4] = 1;    M[5] = 6;     // -4   1   -1
+    M[6] = -3;    M[7] = 0;    M[8] = -10;  // 3/2  0   1/2
+  */
+  // Call LAPACK function to invert the matrix M
+  int ipiv[k]; // Pivot array
+  //LU
+  LAPACKE_zgetrf(LAPACK_COL_MAJOR, k, k, M, k, ipiv);
+  //Inverse
+  LAPACKE_zgetri(LAPACK_COL_MAJOR, k, M, k, ipiv);
+  
+  //Print matrix
+   /* if(g.my_rank==0){
+    printf("Inverted Matrix M:\n");
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < k; j++) {
+        printf("(%f) ", creal(M[i*k + j]));//, cimag(M[i*k + j]));
+        }
+        printf("\n");
+    }
+  }*/
+  
+  PUBLIC_FREE( vec_buffer, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+
+}
 
 void block_powerit_PRECISION( int depth_bp_op, level_struct *l, struct Thread *threading ){
   int i;

@@ -639,6 +639,7 @@
 #include "powerit_double.h"
 #include "hutchinson_float.h"
 #include "hutchinson_double.h"
+#include <lapacke.h>
 
 #ifdef HAVE_LIME
 #include <lime.h>

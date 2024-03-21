@@ -276,6 +276,7 @@ typedef struct {
     vector_PRECISION* vecs;
     vector_PRECISION* U;
     complex_PRECISION* SV;
+    complex_PRECISION *M; //for Multigrid deflation;
     vector_PRECISION vecs_buff1;
     vector_PRECISION vecs_buff2;
     vector_PRECISION vecs_buff3;
