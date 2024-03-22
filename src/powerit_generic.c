@@ -173,6 +173,8 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         block_powerit_PRECISION( depth_bp_op+1, l, threading );
         //and compute the U vectors (also in coarser)
         get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
+        MPI_Finalize();
+        exit(0);
         compute_U_from_V_PRECISION( depth_bp_op+1, l, threading );
         matrix_computation_PRECISION(l->next_level, threading);
     }
@@ -415,7 +417,7 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
   }
   END_MASTER(threading)
   SYNC_CORES(threading)
-
+  
   nr_iters = fgmres_PRECISION( p, l, threading );
 
   START_MASTER(threading)
@@ -477,7 +479,7 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   
   START_MASTER(threading)
   for( i=1;i<lx->powerit_PRECISION.nr_vecs;i++ ){
-    vecs_buff[i] = vecs_buff[0] + i*lx->vector_size;
+    vecs_buff[i] = vecs_buff[0] + i*lx->vector_size; //TODO:discuss inner_vector_size
   }
   END_MASTER(threading)
   SYNC_CORES(threading)
@@ -486,7 +488,9 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
   compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
   
-  
+  // -----------------------------------
+  // computing Rayleigh quotients
+
   // backup of deflation vectors
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
     vector_PRECISION_copy( vecs_buff[i], lx->powerit_PRECISION.vecs[i], start, end, lx );
@@ -498,16 +502,53 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
     rq = global_inner_product_PRECISION( vecs_buff[i], lx->powerit_PRECISION.vecs[i],  px->v_start, px->v_end, lx, threading );
     norm = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
-    rq /= norm; 
+    rq /= (norm*norm); 
     
-    lx->powerit_PRECISION.SV[i] = rq;
-  // Restore Backup
+    lx->powerit_PRECISION.SV[i] = 1.0/rq;
+    
+    // Restore Backup
     vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
     
     if(g.my_rank==0)
-        printf("---------\t %f + i%f\n", rq);
+        printf("---------\t %f + i%f\n", 1.0/rq);
   }
+  
+  // -----------------------------------
+  // computing eigen-residuals
+  
+  PRECISION norm2,rel_res;
+
+  // backup of deflation vectors
+  for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
+    vector_PRECISION_copy( vecs_buff[i], lx->powerit_PRECISION.vecs[i], start, end, lx );
+  }
+  
+  // apply the operator
+
+  //blind_bp_op_PRECISION_apply( lx, threading );
+  
+  for ( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ) {
+    vector_PRECISION_copy( px->b, lx->powerit_PRECISION.vecs[i], start, end, lx );
+    apply_coarse_operator_PRECISION( lx->powerit_PRECISION.vecs[i], px->b, px->op, lx, threading );
+  }
+
+  for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
+
+    vector_PRECISION_saxpy( lx->powerit_PRECISION.vecs[i], lx->powerit_PRECISION.vecs[i],
+                            vecs_buff[i], -lx->powerit_PRECISION.SV[i], start, end, lx );
+      
+    norm  = global_norm_PRECISION(lx->powerit_PRECISION.vecs[i], 0, lx->inner_vector_size, lx, threading );
+    norm2 = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
     
+    rel_res = norm/(norm2*cabs_PRECISION(lx->powerit_PRECISION.SV[i]));
+    
+    // Restore Backup
+    vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
+    
+    if(g.my_rank==0)
+        printf("---------\t %f\n", rel_res);
+  }
+  
   PUBLIC_FREE( vecs_buff[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
 }
 // ------------------------------------------------------------------------------------------

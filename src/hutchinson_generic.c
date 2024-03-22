@@ -569,3 +569,101 @@ void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l
 
   vector_PRECISION_minus(  input, input, l->powerit_PRECISION.vecs_buff1, start, end, l );
 }
+
+
+
+/*
+complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct Thread *threading ){
+  int i;
+  complex_PRECISION trace = 0.0;
+  struct sample estimate;
+  hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
+  level_struct* lx;
+
+  // for all but coarsest level
+  lx = l;
+  //Precompute k-by-k matrix 
+   matrix_computation_PRECISION( lx,  threading);
+  // set the pointer to the deflated operator
+  h->hutch_compute_one_sample = hutchinson_multigrid_deflated_PRECISION;
+  estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+  trace += estimate.acc_trace/estimate.sample_size;
+  
+  //adding direct term
+  ///if(g.trace_deflation_type[lx->depth] != 0){
+  //trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
+ // }
+  
+ 
+  return trace;
+}
+*/
+  
+/*
+
+complex_PRECISION hutchinson_multigrid_deflated_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+    
+   
+       
+    int i, start, end,k;
+    complex_PRECISION aux;
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+    compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+    level_struct* lxc = l->next_level;
+    k = lxc->powerit_PRECISION.nr_vecs;
+    complex_PRECISION* vec_buffer = NULL;
+    vec_buffer = malloc(lxc->powerit_PRECISION.nr_vecs * sizeof(complex_PRECISION));
+    //gamma_5 x
+    if( l->depth==0 ){
+        gamma5_PRECISION(  l->powerit_PRECISION.vecs_buff1,  h->rademacher_vector, l, threading );
+    }
+    else{
+      int startg5, endg5;
+      compute_core_start_end_custom(0, l->inner_vector_size, &startg5, &endg5, l, threading, l->num_lattice_site_var );
+      coarse_gamma5_PRECISION(  l->powerit_PRECISION.vecs_buff1,  h->rademacher_vector, startg5, endg5, l );
+    }
+    
+    //R gamma_5 x
+    apply_R_PRECISION(lxc->powerit_PRECISION.vecs_buff1, l->powerit_PRECISION.vecs_buff1, l, threading);
+    
+    //U_c R gamma_5 x
+    for( i=0; i<k; i++){   
+       vec_buffer[i] = global_inner_product_PRECISION(lxc->powerit_PRECISION.U[i], lxc->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, lxc, threading);
+    }
+    
+    ///TODO;
+     //   vec_buffer = M * vec_buffer
+     //
+    
+    // vecs_buff2 = V_c vec_buffer
+    vector_PRECISION_scale( l->powerit_PRECISION.vecs_buff2 , l->powerit_PRECISION.vecs[0], vec_buffer[0], start, end, l);
+    for( i=1; i<k; i++){
+    // buff3 <- buff2
+    vector_PRECISION_copy(l->powerit_PRECISION.vecs_buff3, l->powerit_PRECISION.vecs_buff2, start, end, l);
+    // buff2 <- alphai * vi
+    vector_PRECISION_scale( l->powerit_PRECISION.vecs_buff2, l->powerit_PRECISION.vecs[i], aux[i], start, end, l);
+    // buff1 <- buff3 + buff2
+    vector_PRECISION_plus( l->powerit_PRECISION.vecs_buff1 , l->powerit_PRECISION.vecs_buff3 , l->powerit_PRECISION.vecs_buff2, start, end, l);
+    }
+    
+    
+        h->mlmc_b2 = Prolongate vec_buffer
+    
+    
+    
+    vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
+    
+
+    // solution of this solve is in l->p_PRECISION.x
+    apply_solver_PRECISION( l, threading );
+  
+    vector_PRECISION_minus( h->mlmc_b1, p->x, h->mlmc_b2, start, end, l );
+    
+    aux = global_inner_product_PRECISION( h->rademacher_vector, h->mlmc_b1, p->v_start, p->v_end, l, threading );
+    
+    return aux;
+
+ 
+    
+}
+*/
