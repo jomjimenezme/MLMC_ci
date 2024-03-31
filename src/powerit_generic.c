@@ -174,10 +174,8 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         //and compute the U vectors (also in coarser)
         get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
         test_orthogonality_PRECISION(depth_bp_op+1, l, threading );
-        MPI_Finalize();
-        exit(0);
         compute_U_from_V_PRECISION( depth_bp_op+1, l, threading );
-        matrix_computation_PRECISION(l->next_level, threading);
+        //matrix_computation_PRECISION(l->next_level, threading);
     }
     
   }

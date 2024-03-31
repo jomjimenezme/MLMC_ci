@@ -35,5 +35,5 @@
   gmres_PRECISION_struct* get_p_struct_PRECISION( level_struct* l );
   struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, int type, struct Thread *threading );
   
-  complex_PRECISION hutchinson_multigrid_deflated_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
 #endif

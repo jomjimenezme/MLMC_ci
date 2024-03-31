@@ -202,6 +202,17 @@ int main( int argc, char **argv ) {
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (split) MGMLMC = %f+i%f\n", CSPLIT(trace));
       END_MASTER(threadingx)
+    }else if ( op_type==6 ) {
+      START_MASTER(threadingx)
+      if(g.my_rank==0) printf("Using MULTIGRID DEFLATION for computing the trace\n");
+      END_MASTER(threadingx)
+
+      trace = multigrid_deflation_driver_double( &l, &threading );
+
+      START_MASTER(threadingx)
+      if(g.my_rank==0) printf("\n");
+      if(g.my_rank==0) printf("Resulting trace from MULTIGRID DEFLATION = %f+i%f\n", CSPLIT(trace));
+      END_MASTER(threadingx)
     }
 
     hutchinson_diver_double_free( &l, &threading );
