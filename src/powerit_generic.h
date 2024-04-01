@@ -19,5 +19,7 @@
   void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct Thread* threading );
   void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l, struct Thread* threading );
   void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading);
+  gmres_PRECISION_struct* get_p_struct_PRECISION_2( level_struct* l );
+  void test_orthogonality_PRECISION(int depth_bp_op, level_struct* l, struct Thread* threading );
 
 #endif

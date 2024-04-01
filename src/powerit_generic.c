@@ -509,7 +509,7 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
     vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
     
     if(g.my_rank==0)
-        printf("---------\t %f + i%f\n", rq);
+        printf("---------\t %f + i%f\n", creal(rq), cimag(rq));
   }
   
   // -----------------------------------

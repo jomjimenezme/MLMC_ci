@@ -36,4 +36,6 @@
   struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, int type, struct Thread *threading );
   
   complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading );
+  void matrix_multiply_PRECISION(complex_PRECISION *C, complex_PRECISION *A, complex_PRECISION *B, int n);
 #endif

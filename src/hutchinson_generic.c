@@ -592,9 +592,9 @@ complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct 
  
 
   //adding direct term
-  ///if(g.trace_deflation_type[lx->depth] != 0){
-  //trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
- // }
+  if(g.trace_deflation_type[lx->depth] == 6){
+    trace += hutchinson_multigrid_direct_PRECISION(l, h, threading );
+  }
   
  
   return trace;
@@ -606,7 +606,7 @@ complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct 
 complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
     
    
-    int i, start, end,k;
+    int i, j, start, end, k;
     complex_PRECISION aux;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
@@ -639,8 +639,8 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
     
    
    //vec_buffer1 = M_inv vec_buffer = M_inv U_c R gamma_5 x
-   for (int i = 0; i < k; ++i) {
-        for (int j = 0; j < k; ++j) {
+   for (i = 0; i < k; ++i) {
+        for (j = 0; j < k; ++j) {
             vec_buffer1[i] += M_inv[i * k + j] * vec_buffer[j]; // Compute y[i] += A[i][j] * x[j]
         }
     }
@@ -676,10 +676,105 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
 
 
 
-//complex_PRECISION hutchinson_multigrid_deflated_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
 
+  int i, j, startx, endx, startg5, endg5,  k;
+  //everything is done in coarser level
+  level_struct* lxc = l->next_level;
+  gmres_PRECISION_struct* pxc = get_p_struct_PRECISION_2( lxc );
+  compute_core_start_end(0, lxc->inner_vector_size, &startx, &endx, lxc, threading);
+  compute_core_start_end_custom(0, lxc->inner_vector_size, &startg5, &endg5, lxc, threading, lxc->num_lattice_site_var );
+  k = lxc->powerit_PRECISION.nr_vecs;
   
+  //Buffer
+  vector_PRECISION* vecs_buff;
+  vecs_buff = NULL;
+  PUBLIC_MALLOC( vecs_buff, complex_PRECISION*, lxc->powerit_PRECISION.nr_vecs );
+  vecs_buff[0] = NULL;
+  PUBLIC_MALLOC( vecs_buff[0], complex_PRECISION, lxc->powerit_PRECISION.nr_vecs*lxc->vector_size );
 
+  START_MASTER(threading)
+  for( i=1; i<lxc->powerit_PRECISION.nr_vecs; i++ ){
+    vecs_buff[i] = vecs_buff[0] + i*lxc->vector_size; //TODO:discuss inner_vector_size
+  }
+  END_MASTER(threading)
+  SYNC_CORES(threading)
+ 
+ 
+  // backup of deflation vectors
+  for( i=0; i<lxc->powerit_PRECISION.nr_vecs; i++ ){
+    vector_PRECISION_copy( vecs_buff[i], lxc->powerit_PRECISION.vecs[i], startx, endx, lxc );
+  }
+  for(i=0; i<k; i++){
+    //gamma_5c V_c
+    coarse_gamma5_PRECISION(  vecs_buff[i],  lxc->powerit_PRECISION.vecs[i], startg5, endg5, lxc );
+  }
+ 
+  complex_PRECISION *C = NULL;
+  C = malloc(k * k * sizeof(complex_PRECISION));
+ 
+  for(i=0; i<k; i++){
+    for(j=0; j<k; j++){
+      C[i +j*k] = global_inner_product_PRECISION( lxc->powerit_PRECISION.U[i], vecs_buff[j],  pxc->v_start, pxc->v_end, lxc, threading );
 
+    }
+	
+  }
 
-//}
+  complex_PRECISION *M = lxc->powerit_PRECISION.M; 
+  complex_PRECISION *aux = malloc(k * k * sizeof(complex_PRECISION));
+   
+
+  matrix_multiply_PRECISION(aux, M, C, k);  
+  
+  complex_PRECISION trace; 
+  
+  for(i=0; i<k*k; i+=k+1){
+    trace += aux[i];
+  }
+
+  return trace; 
+
+}
+
+//helper function: temporary till working with BLAS C=A*B
+void matrix_multiply_PRECISION(complex_PRECISION *C, complex_PRECISION *A, complex_PRECISION *B, int n) {
+/*if(g.my_rank==0)printf("Matrix A:\n");
+  for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+          if(g.my_rank==0)printf("(%.2f, %.2f)\t", creal(A[ i*n +j ]), cimag(A[i*n + j]));
+      }
+      if(g.my_rank==0)printf("\n");
+  }
+
+if(g.my_rank==0)printf("B Matrix:\n");
+  for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+          if(g.my_rank==0)printf("(%.2f, %.2f)\t", creal(B[ i*n +j ]), cimag(B[i*n + j]));
+      }
+      if(g.my_rank==0)printf("\n");
+  }
+*/
+
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+        C[i * n + j] = 0.0 + 0.0*I;
+        for (int k = 0; k < n; k++) {
+            C[i * n + j] += A[i * n + k] * B[j + k*n]; // Note the change here
+        }
+    }
+} 
+     
+
+/*
+if(g.my_rank==0)printf("Matrix A(B) :\n");
+  for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+          if(g.my_rank==0)printf("(%.2f, %.2f)\t", creal(C[ i*n +j ]), cimag(C[i*n + j]));
+      }
+      if(g.my_rank==0)printf("\n");
+  }
+
+*/
+
+}
