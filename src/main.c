@@ -165,6 +165,8 @@ int main( int argc, char **argv ) {
       if ( g.trace_op_type<3 || g.trace_op_type>5 ) {
         if(g.my_rank==0) warning("CAREFUL : you are using different operators for BPI and the trace method");
       }
+    } else if(g.trace_deflation_type[0]==6 && g.trace_powerit_spectrum_type[0]==0){
+        if(g.my_rank==0) warning("CAREFUL : multigrid deflation uses singular-space, not eigenspace");
     }
     op_type = g.trace_op_type;
 

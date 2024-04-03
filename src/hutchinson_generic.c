@@ -575,28 +575,29 @@ void hutchinson_deflate_vector_PRECISION(vector_PRECISION input, level_struct *l
 
 complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct Thread *threading ){
 
-  int i;
+
   complex_PRECISION trace = 0.0;
   struct sample estimate;
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
   level_struct* lx;
-
-  // for all but coarsest level
+  level_struct* lxc;
+  
   lx = l;
+  lxc = lx->next_level;
   //Precompute k-by-k matrix 
-  // matrix_computation_PRECISION( lx,  threading);
+  matrix_computation_PRECISION( lxc,  threading);
+  
   // set the pointer to the deflated operator
   h->hutch_compute_one_sample = hutchinson_multigrid_deflated_PRECISION;
   estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
   trace += estimate.acc_trace/estimate.sample_size;
- 
 
   //adding direct term
   if(g.trace_deflation_type[lx->depth] == 6){
     trace += hutchinson_multigrid_direct_PRECISION(l, h, threading );
   }
   
- 
+  if(g.my_rank==0) printf("TRACE: %f+%f\n", CSPLIT(trace));
   return trace;
 }
 
@@ -606,20 +607,22 @@ complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct 
 complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
     
    
-    int i, j, start, end, k;
-    complex_PRECISION aux;
+    int i, j, start, end, startxc, endxc, k;
+    complex_PRECISION aux =0.0 +0.0*I;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
     level_struct* lxc = l->next_level;
+    compute_core_start_end( 0, lxc->inner_vector_size, &startxc, &endxc, lxc, threading );
+   
     k = l->powerit_PRECISION.nr_vecs;
-
     complex_PRECISION *M_inv = lxc->powerit_PRECISION.M;
     complex_PRECISION* vec_buffer = NULL;
     vec_buffer = malloc(lxc->powerit_PRECISION.nr_vecs * sizeof(complex_PRECISION));
     complex_PRECISION *vec_buffer1 = NULL;
     vec_buffer1 = malloc(k * sizeof(complex_PRECISION));
-    memset(vec_buffer, 0.0, k * sizeof(complex_PRECISION));
-
+    memset(vec_buffer, 0.0 + 0.0*I, k * sizeof(complex_PRECISION));
+    memset(vec_buffer1, 0.0 + 0.0*I, k * sizeof(complex_PRECISION));
+    
     //gamma_5 x
     if( l->depth==0 ){
         gamma5_PRECISION(  l->powerit_PRECISION.vecs_buff1,  h->rademacher_vector, l, threading );
@@ -646,10 +649,10 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
     }
   
    //V_c M_inv U_c R gamma_5 x
-    vector_PRECISION_scale( lxc->powerit_PRECISION.vecs_buff1, lxc->powerit_PRECISION.vecs_buff1, 0.0, start, end, lxc );   
+    vector_PRECISION_define( lxc->powerit_PRECISION.vecs_buff1, 0.0 + 0.0*I, startxc, endxc, lxc );
     for( i = 0; i < lxc->powerit_PRECISION.nr_vecs; i++ ){
     vector_PRECISION_saxpy( lxc->powerit_PRECISION.vecs_buff1 , lxc->powerit_PRECISION.vecs_buff1,
-                            lxc->powerit_PRECISION.vecs[i], vec_buffer[i], start, end, lxc );
+                            lxc->powerit_PRECISION.vecs[i], vec_buffer1[i], startxc, endxc, lxc );
     }
    
    //P V_c M_inv U_c R gamma_5 x
@@ -675,7 +678,7 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
 
 
 
-
+//M_inv (U_c \gamma_5c V_c)
 complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
 
   int i, j, startx, endx, startg5, endg5,  k;
@@ -701,12 +704,13 @@ complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchin
   SYNC_CORES(threading)
  
  
-  // backup of deflation vectors
+  // copy of deflation vectors
   for( i=0; i<lxc->powerit_PRECISION.nr_vecs; i++ ){
     vector_PRECISION_copy( vecs_buff[i], lxc->powerit_PRECISION.vecs[i], startx, endx, lxc );
   }
+  
+  //gamma_5c V_c
   for(i=0; i<k; i++){
-    //gamma_5c V_c
     coarse_gamma5_PRECISION(  vecs_buff[i],  lxc->powerit_PRECISION.vecs[i], startg5, endg5, lxc );
   }
  
@@ -715,24 +719,23 @@ complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchin
  
   for(i=0; i<k; i++){
     for(j=0; j<k; j++){
-      C[i +j*k] = global_inner_product_PRECISION( lxc->powerit_PRECISION.U[i], vecs_buff[j],  pxc->v_start, pxc->v_end, lxc, threading );
-
+      C[i + j * k] = global_inner_product_PRECISION( lxc->powerit_PRECISION.U[i], vecs_buff[j],  pxc->v_start, pxc->v_end, lxc, threading );
     }
-	
   }
 
-  complex_PRECISION *M = lxc->powerit_PRECISION.M; 
+  complex_PRECISION *M_inv = lxc->powerit_PRECISION.M; 
   complex_PRECISION *aux = malloc(k * k * sizeof(complex_PRECISION));
    
 
-  matrix_multiply_PRECISION(aux, M, C, k);  
+  matrix_multiply_PRECISION(aux, M_inv, C, k);  
   
-  complex_PRECISION trace; 
+  complex_PRECISION trace = 0.0 + 0.0*I; 
   
   for(i=0; i<k*k; i+=k+1){
     trace += aux[i];
   }
-
+  
+  if(g.my_rank==0) printf("Trace from direct term = %f +%f \n", CSPLIT(trace));
   return trace; 
 
 }

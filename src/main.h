@@ -82,7 +82,12 @@
   #define pow_double pow
   #define pow_float powf
   #define abs_double fabs
-  #define abs_float fabsf
+  #define abs_float fabsf  
+  
+  #define getri_double LAPACKE_zgetri
+  #define getri_float LAPACKE_cgetri
+  #define getrf_double LAPACKE_zgetrf
+  #define getrf_float LAPACKE_cgetrf
   
 #if defined(GCRODR) || defined(POLYPREC)
   #define geev_double LAPACKE_zgeev 
@@ -99,6 +104,9 @@
   #define gesv_float LAPACKE_cgesv
   #define gels_double LAPACKE_zgels
   #define gels_float LAPACKE_cgels
+  
+
+  
   //#define pgeqr2_double pzgeqr2_
   //#define pgeqr2_float pcgeqr2_
   //#define pung2r_double pzung2r_

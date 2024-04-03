@@ -62,6 +62,7 @@ void block_powerit_PRECISION_init_and_alloc( int spec_type, int depth_bp_op, int
   
   
   PUBLIC_MALLOC( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
+  PUBLIC_MALLOC( lx->powerit_PRECISION.EV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  ); 
   
   lx->powerit_PRECISION.M = malloc(lx->powerit_PRECISION.nr_vecs * lx->powerit_PRECISION.nr_vecs * sizeof(complex_PRECISION));
 }
@@ -87,6 +88,8 @@ void block_powerit_PRECISION_free( level_struct* l, struct Thread* threading ){
     PUBLIC_FREE( lx->powerit_PRECISION.gs_buffer, complex_PRECISION, 2*lx->powerit_PRECISION.nr_vecs );
     
     PUBLIC_FREE( lx->powerit_PRECISION.SV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  );
+    PUBLIC_FREE( lx->powerit_PRECISION.EV, complex_PRECISION, lx->powerit_PRECISION.nr_vecs  ); 
+  
     free(lx->powerit_PRECISION.M);
   }
 }
@@ -171,11 +174,11 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
           printf("Doing BPI at depth %d \n", depth_bp_op+1);
         //and then call the method from the coarser level
         block_powerit_PRECISION( depth_bp_op+1, l, threading );
-        //and compute the U vectors (also in coarser)
-        get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
-        test_orthogonality_PRECISION(depth_bp_op+1, l, threading );
+	    get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
+        //test_orthogonality_PRECISION(depth_bp_op+1, l, threading );
+        
+	    //and compute the U vectors (also in coarser)
         compute_U_from_V_PRECISION( depth_bp_op+1, l, threading );
-        //matrix_computation_PRECISION(l->next_level, threading);
     }
     
   }
@@ -184,7 +187,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
 
 void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
   int i, j;
-  int k = lx->powerit_PRECISION.nr_vecs; //3
+  int k = lx->powerit_PRECISION.nr_vecs; 
   
   gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( lx );
   
@@ -210,7 +213,7 @@ void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
     }
         
   }
-  //TODO: Dada type correct? + LAPACK_COL_MAJOR vs ROW
+
   complex_PRECISION *M = lx->powerit_PRECISION.M;
   //M = U^* gamma_5 A V_c
   for( i=0; i<k; i++){
@@ -226,9 +229,9 @@ void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
   // Call LAPACK function to invert the matrix M
   int ipiv[k]; // Pivot array
   //LU
-  LAPACKE_zgetrf(LAPACK_COL_MAJOR, k, k, M, k, ipiv);
+  getrf_PRECISION(LAPACK_COL_MAJOR, k, k, M, k, ipiv);
   //Inverse
-  LAPACKE_zgetri(LAPACK_COL_MAJOR, k, M, k, ipiv);
+  getri_PRECISION(LAPACK_COL_MAJOR, k, M, k, ipiv);
   
   //Print matrix
    /* if(g.my_rank==0){
@@ -430,12 +433,12 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
   return nr_iters;
 }
 
-// U = \gamma_5 V Sign (Lambda)
+// U = \gamma_5 V Sign(Lambda)
 void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* threading ){
   
   int i, start, end;
   level_struct* lx = get_correct_l_PRECISION( depth_bp_op,l );
-  complex_PRECISION* rq  = lx->powerit_PRECISION.SV;
+  complex_PRECISION* lambda  = lx->powerit_PRECISION.EV;
   gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
   compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
 
@@ -450,14 +453,15 @@ void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* thre
       coarse_gamma5_PRECISION( lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.vecs[i], startg5, endg5, lx );
     }
     
-    if( signbit(creal(rq[i])) ){
+    if( signbit(creal(lambda[i])) ){
       sign_lambda = -1.0;
       vector_PRECISION_scale(lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.U[i], sign_lambda, start, end, lx );
-      if(g.my_rank==0)
-          printf("Negative\n");
+      //if(g.my_rank==0)
+          //printf("Negative\n");
     }else{
-     if(g.my_rank==0)
-          printf("Positive\n");   
+     //if(g.my_rank==0)
+          //printf("Positive\n");   
+      continue;
     }
 
   }
@@ -495,7 +499,7 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
     vector_PRECISION_copy( vecs_buff[i], lx->powerit_PRECISION.vecs[i], start, end, lx );
   }
   
-  // apply the operator
+  // apply the operator  (it includes Gamma5 for SV)
   blind_bp_op_PRECISION_apply( lx, threading );
 
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
@@ -503,8 +507,9 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
     norm = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
     rq /= (norm*norm); 
     
-    lx->powerit_PRECISION.SV[i] = rq;
-    
+    //We store the low modes of D:
+    lx->powerit_PRECISION.EV[i] = 1.0/rq;
+    lx->powerit_PRECISION.SV[i] = cabs_PRECISION(1.0/rq);
     // Restore Backup
     vector_PRECISION_copy(lx->powerit_PRECISION.vecs[i], vecs_buff[i], start, end, lx );
     
@@ -515,7 +520,7 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   // -----------------------------------
   // computing eigen-residuals
   
-  PRECISION norm2,rel_res;
+  PRECISION norm2, rel_res;
 
   // backup of deflation vectors
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
@@ -523,20 +528,20 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   }
   
   // apply the operator
-
   blind_bp_op_PRECISION_apply( lx, threading );
  
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
-
-    double norm = global_norm_PRECISION( vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
+    complex_PRECISION rq = 1.0/lx->powerit_PRECISION.EV[i];
     
+    // Ax - \lambda x
     vector_PRECISION_saxpy( lx->powerit_PRECISION.vecs[i], lx->powerit_PRECISION.vecs[i],
-                            vecs_buff[i], -lx->powerit_PRECISION.SV[i], start, end, lx );
+                            vecs_buff[i], -rq, start, end, lx );// z := x + alpha*y
+
       
     norm  = global_norm_PRECISION(lx->powerit_PRECISION.vecs[i], 0, lx->inner_vector_size, lx, threading );
     norm2 = global_norm_PRECISION(vecs_buff[i], 0, lx->inner_vector_size, lx, threading );
     
-    rel_res = norm/(norm2*cabs_PRECISION(lx->powerit_PRECISION.SV[i]));
+    rel_res = norm/(norm2*cabs_PRECISION(rq)); // ||Ax - \lambda x||/|| \lambda x ||
     
     
     
@@ -633,7 +638,7 @@ void test_powerit_quality_PRECISION( level_struct* lx, struct Thread* threading 
     // compute the eigenvalue residual
     vector_PRECISION_scale( vecs_buff2[i], lx->powerit_PRECISION.vecs[i], rq, start, end, lx );
     vector_PRECISION_minus( vecs_buff1[i], vecs_buff1[i], vecs_buff2[i], start, end, lx );
-    double resx = global_norm_PRECISION( vecs_buff1[i], 0, lx->inner_vector_size, lx, threading ) / ( cabs(rq)*norm );
+    double resx = global_norm_PRECISION( vecs_buff1[i], 0, lx->inner_vector_size, lx, threading ) / ( cabs_PRECISION(rq)*norm );
     
     // print the residuals
     START_MASTER(threading)
