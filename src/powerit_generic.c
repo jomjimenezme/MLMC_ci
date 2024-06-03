@@ -135,7 +135,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
         error0("under construction!\n");
         lx->powerit_PRECISION.apply_to_one_vector = powerit_split_orthog_op_PRECISION;
         break;
-      case 6: //needed: non-diff operator at the coarser
+      case 6: //Deflation vetors for non-diff operator at the second level
         lx->next_level->powerit_PRECISION.apply_to_one_vector = powerit_non_diff_op_PRECISION;
         break;
 
@@ -200,7 +200,7 @@ void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
     vec_buffer[i] = vec_buffer[0] + i*lx->vector_size;
   }
   
-  //gamma_5 A V_c
+  //vec_buffer = gamma_5 A V_c
   for( i=0; i<k; i++){
     apply_operator_PRECISION( vec_buffer[i], lx->powerit_PRECISION.vecs[i], p, lx, threading );
     if( lx->depth==0 ){
@@ -531,7 +531,7 @@ void get_rayleight_quotients_PRECISION(int depth_bp_op, level_struct* l, struct 
   blind_bp_op_PRECISION_apply( lx, threading );
  
   for( i=0;i<lx->powerit_PRECISION.nr_vecs;i++ ){
-    complex_PRECISION rq = 1.0/lx->powerit_PRECISION.EV[i];
+    rq = 1.0/lx->powerit_PRECISION.EV[i];
     
     // Ax - \lambda x
     vector_PRECISION_saxpy( lx->powerit_PRECISION.vecs[i], lx->powerit_PRECISION.vecs[i],

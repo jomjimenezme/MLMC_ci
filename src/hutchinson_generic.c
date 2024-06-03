@@ -593,9 +593,8 @@ complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct 
   trace += estimate.acc_trace/estimate.sample_size;
 
   //adding direct term
-  if(g.trace_deflation_type[lx->depth] == 6){
-    trace += hutchinson_multigrid_direct_PRECISION(l, h, threading );
-  }
+  trace += hutchinson_multigrid_direct_PRECISION(l, h, threading );
+  
   
   if(g.my_rank==0) printf("TRACE: %f+%f\n", CSPLIT(trace));
   return trace;
@@ -628,9 +627,7 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
         gamma5_PRECISION(  l->powerit_PRECISION.vecs_buff1,  h->rademacher_vector, l, threading );
     }
     else{
-      int startg5, endg5;
-      compute_core_start_end_custom(0, l->inner_vector_size, &startg5, &endg5, l, threading, l->num_lattice_site_var );
-      coarse_gamma5_PRECISION(  l->powerit_PRECISION.vecs_buff1,  h->rademacher_vector, startg5, endg5, l );
+      error0("Stochastic term MD: product by Gamma_5 in finest only\n");
     }
     
     //R gamma_5 x
@@ -665,9 +662,9 @@ complex_PRECISION hutchinson_multigrid_deflated_PRECISION(int type_appl, level_s
     // solution of this solve is in l->p_PRECISION.x
     apply_solver_PRECISION( l, threading );
   
-    vector_PRECISION_minus( l->powerit_PRECISION.vecs_buff1, p->x, l->powerit_PRECISION.vecs_buff1, start, end, l );
+    vector_PRECISION_minus( l->powerit_PRECISION.vecs_buff2, p->x, l->powerit_PRECISION.vecs_buff1, start, end, l );
     
-    aux = global_inner_product_PRECISION( h->rademacher_vector, l->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, l, threading );
+    aux = global_inner_product_PRECISION( h->rademacher_vector, l->powerit_PRECISION.vecs_buff2, p->v_start, p->v_end, l, threading );
     
     return aux;
 
@@ -704,10 +701,6 @@ complex_PRECISION hutchinson_multigrid_direct_PRECISION(level_struct *l, hutchin
   SYNC_CORES(threading)
  
  
-  // copy of deflation vectors
-  for( i=0; i<lxc->powerit_PRECISION.nr_vecs; i++ ){
-    vector_PRECISION_copy( vecs_buff[i], lxc->powerit_PRECISION.vecs[i], startx, endx, lxc );
-  }
   
   //gamma_5c V_c
   for(i=0; i<k; i++){
