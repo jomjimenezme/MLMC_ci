@@ -583,7 +583,7 @@ complex_PRECISION multigrid_deflation_driver_PRECISION( level_struct *l, struct 
   level_struct* lxc;
   
   lx = l;
-  lxc = lx->next_level;
+  lxc = l->next_level;
   //Precompute k-by-k matrix 
   matrix_computation_PRECISION( lxc,  threading);
   
