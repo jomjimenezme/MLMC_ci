@@ -174,7 +174,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
           printf("Doing BPI at depth %d \n", depth_bp_op+1);
         //and then call the method from the coarser level
         block_powerit_PRECISION( depth_bp_op+1, l, threading );
-	    get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
+	      get_rayleight_quotients_PRECISION(depth_bp_op+1, l, threading);
         //test_orthogonality_PRECISION(depth_bp_op+1, l, threading );
         
 	    //and compute the U vectors (also in coarser)
@@ -185,68 +185,7 @@ void block_powerit_driver_PRECISION( level_struct* l, struct Thread* threading )
 }
 
 
-void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
-  int i, j;
-  int k = lx->powerit_PRECISION.nr_vecs; 
-  
-  gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( lx );
-  
-  //allocation of k buffer vectors
-  vector_PRECISION* vec_buffer = NULL;
-  PUBLIC_MALLOC( vec_buffer, complex_PRECISION*, k );
-  vec_buffer[0] = NULL;
-  PUBLIC_MALLOC( vec_buffer[0], complex_PRECISION, k*lx->vector_size );
-  for( i=1; i<k; i++ ){
-    vec_buffer[i] = vec_buffer[0] + i*lx->vector_size;
-  }
-  
-  //vec_buffer = gamma_5 A V_c
-  for( i=0; i<k; i++){
-    apply_operator_PRECISION( vec_buffer[i], lx->powerit_PRECISION.vecs[i], p, lx, threading );
-    if( lx->depth==0 ){
-        gamma5_PRECISION(  vec_buffer[i],  vec_buffer[i], lx, threading );
-    }
-    else{
-      int startg5, endg5;
-      compute_core_start_end_custom(0, lx->inner_vector_size, &startg5, &endg5, lx, threading, lx->num_lattice_site_var );
-      coarse_gamma5_PRECISION(  vec_buffer[i],  vec_buffer[i], startg5, endg5, lx );
-    }
-        
-  }
 
-  complex_PRECISION *M = lx->powerit_PRECISION.M;
-  //M = U^* gamma_5 A V_c
-  for( i=0; i<k; i++){
-    for( j=0; j<k; j++){   
-       M[i*k + j] = global_inner_product_PRECISION(lx->powerit_PRECISION.U[i], vec_buffer[j], p->v_start, p->v_end, lx, threading);
-    }
-  }
-  /*//Example Matrix
-    M[0] = 1;    M[1] = 0;    M[2] = 4;     // -5   0   -2
-    M[3] = 1;    M[4] = 1;    M[5] = 6;     // -4   1   -1
-    M[6] = -3;    M[7] = 0;    M[8] = -10;  // 3/2  0   1/2
-  */
-  // Call LAPACK function to invert the matrix M
-  int ipiv[k]; // Pivot array
-  //LU
-  getrf_PRECISION(LAPACK_COL_MAJOR, k, k, M, k, ipiv);
-  //Inverse
-  getri_PRECISION(LAPACK_COL_MAJOR, k, M, k, ipiv);
-  
-  //Print matrix
-   /* if(g.my_rank==0){
-    printf("Inverted Matrix M:\n");
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < k; j++) {
-        printf("(%f) ", creal(M[i*k + j]));//, cimag(M[i*k + j]));
-        }
-        printf("\n");
-    }
-  }*/
-  
-  PUBLIC_FREE( vec_buffer, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
-
-}
 
 void block_powerit_PRECISION( int depth_bp_op, level_struct *l, struct Thread *threading ){
   int i;
@@ -433,7 +372,7 @@ int apply_solver_powerit_PRECISION( level_struct* l, struct Thread *threading ){
   return nr_iters;
 }
 
-// U = \gamma_5 V Sign(Lambda)
+// U = \gamma_5 V Sign(Lambda) But Sign is ignored in MG-Deflation
 void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* threading ){
   
   int i, start, end;
@@ -442,7 +381,7 @@ void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* thre
   gmres_PRECISION_struct* px = get_p_struct_PRECISION_2( lx );
   compute_core_start_end(px->v_start, px->v_end, &start, &end, lx, threading);
 
-  PRECISION sign_lambda;
+  //PRECISION sign_lambda;
   for (i = 0; i< lx->powerit_PRECISION.nr_vecs; i++){
     if( lx->depth==0 ){
         gamma5_PRECISION( lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.vecs[i], lx, threading );
@@ -453,7 +392,7 @@ void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* thre
       coarse_gamma5_PRECISION( lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.vecs[i], startg5, endg5, lx );
     }
     
-    if( signbit(creal(lambda[i])) ){
+    /*if( signbit(creal(lambda[i])) ){
       sign_lambda = -1.0;
       vector_PRECISION_scale(lx->powerit_PRECISION.U[i], lx->powerit_PRECISION.U[i], sign_lambda, start, end, lx );
       //if(g.my_rank==0)
@@ -462,7 +401,7 @@ void compute_U_from_V_PRECISION( int depth_bp_op, level_struct* l,  Thread* thre
      //if(g.my_rank==0)
           //printf("Positive\n");   
       continue;
-    }
+    }*/
 
   }
 
@@ -659,4 +598,75 @@ void test_powerit_quality_PRECISION( level_struct* lx, struct Thread* threading 
 
   PUBLIC_FREE( vecs_buff1[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
   PUBLIC_FREE( vecs_buff2[0], complex_PRECISION, lx->powerit_PRECISION.nr_vecs*lx->vector_size );
+}
+
+
+void matrix_computation_PRECISION(level_struct* lx, struct Thread* threading){
+  int i, j;
+  int k = lx->powerit_PRECISION.nr_vecs; 
+  
+  gmres_PRECISION_struct* p = get_p_struct_PRECISION_2( lx );
+  
+  //allocation of k buffer vectors
+  vector_PRECISION* vec_buffer = NULL;
+  PUBLIC_MALLOC( vec_buffer, complex_PRECISION*, k );
+  vec_buffer[0] = NULL;
+  PUBLIC_MALLOC( vec_buffer[0], complex_PRECISION, k*lx->vector_size );
+  for( i=1; i<k; i++ ){
+    vec_buffer[i] = vec_buffer[0] + i*lx->vector_size;
+  }
+  
+  //vec_buffer = D_c gamma_5 U_c
+  for( i=0; i<k; i++){
+    if( lx->depth==0 ){
+        gamma5_PRECISION(  vec_buffer[i], lx->powerit_PRECISION.U[i], lx, threading );
+    }
+    else{
+      int startg5, endg5;
+      compute_core_start_end_custom(0, lx->inner_vector_size, &startg5, &endg5, lx, threading, lx->num_lattice_site_var );
+      coarse_gamma5_PRECISION(  vec_buffer[i],  lx->powerit_PRECISION.U[i], startg5, endg5, lx );
+    }
+    apply_operator_PRECISION( vec_buffer[i], vec_buffer[i], p, lx, threading );   
+  }
+  
+  //create matrix for eigendecomposition
+  complex_PRECISION *M = lx->powerit_PRECISION.M;
+   
+  //M = U^H D_c gamma_5 U_c
+  for( i=0; i<k; i++){
+    for( j=0; j<k; j++){   
+       M[i*k + j] = global_inner_product_PRECISION(lx->powerit_PRECISION.U[i], vec_buffer[j], p->v_start, p->v_end, lx, threading);
+    }
+  }
+   /*//Example Matrix
+    k=3;																		// RSV:
+    M[0] = I;    M[1] = 0;    M[2] = 4;     // 0.0000 + 0.0000i   0.4453 + 0.2004i  -0.3510 + 0.0483i
+    M[3] = I;    M[4] = I;    M[5] = 6;     // 1.0000 + 0.0000i   0.8563 + 0.0000i  -0.5155 + 0.1115i
+    M[6] = -3;    M[7] = 0;    M[8] = -10;  // 0.0000 + 0.0000i  -0.1612 - 0.0475i   0.7722 + 0.0000i
+  */
+  complex_PRECISION w[k]; // Array to store eigenvalues
+
+  // LAPACKE_zgeev computes eigenvalues and, optionally, the left and/or right eigenvectors
+  // 'N' means left eigenvectors not needed, 'V' means right eigenvectors are computed
+  // NULL can be replaced with vr and M is overwritten (second appeareance).
+  LAPACKE_zgeev(LAPACK_ROW_MAJOR, 'N', 'V', k, M, k, w, NULL, k, M, k);
+  
+  /*Print matrix
+    if(g.my_rank==0){
+    // Output the right eigenvectors
+    printf("Right Eigenvectors (stored column-wise):\n");
+    for(int i = 0; i < k; i++) {
+        for(int j = 0; j < k; j++) {
+            printf("(%f, %f) ", creal(M[i*k+ j]), cimag(M[i*k+j]));
+        }
+        printf("\n");
+    }
+     for(int j = 0; j < k; j++) {
+            printf("(%f, %f) ", creal(w[j]), cimag(w[j]));
+            }
+  }
+  */
+  
+  PUBLIC_FREE( vec_buffer, complex_PRECISION*, lx->powerit_PRECISION.nr_vecs );
+  exit(0);
 }
