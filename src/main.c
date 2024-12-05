@@ -156,7 +156,8 @@ int main( int argc, char **argv ) {
     */
 
     complex_double trace;
-
+    g.omega = 1.0;
+    
     int op_type;
     if ( g.trace_deflation_type[0]==1 || g.trace_deflation_type[0]==2 ) {
       if ( g.trace_deflation_type[0] != g.trace_op_type )

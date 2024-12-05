@@ -486,6 +486,8 @@
     int setup_phase_ctr;
     
     int if_rademacher;
+    
+    double omega;
   } global_struct;
 
   extern global_struct g;

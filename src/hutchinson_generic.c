@@ -206,7 +206,7 @@ complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hu
       aux = global_inner_product_PRECISION( h->rademacher_vector, p->x, p->v_start, p->v_end, l, threading );   
     } else {
       vector_PRECISION_copy(l->powerit_PRECISION.vecs_buff1, p->x, start, end, l);  
-      aux = global_inner_product_PRECISION( l->powerit_PRECISION.vecs[type_appl], l->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, l, threading );
+      aux = g.omega * global_inner_product_PRECISION( l->powerit_PRECISION.vecs[type_appl], l->powerit_PRECISION.vecs_buff1, p->v_start, p->v_end, l, threading );
     }
 
     return aux;  
@@ -292,6 +292,12 @@ complex_PRECISION hutchinson_mlmc_difference_PRECISION( int type_appl, level_str
     // the input of this solve is l->next_level->p_PRECISION.x, the output l->next_level->p_PRECISION.b
     apply_solver_PRECISION( l->next_level, threading );
     apply_P_PRECISION( h->mlmc_b2, l->next_level->p_PRECISION.x, l, threading );
+    
+    
+    int start, end;
+    gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
+    compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
+    vector_PRECISION_scale( h->mlmc_b2 , h->mlmc_b2 , g.omega, start, end, l);
   }
 
   // subtract the results and perform dot product
@@ -322,7 +328,9 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
   struct sample estimate;
   hutchinson_PRECISION_struct* h = &(l->h_PRECISION);
   level_struct* lx;
-
+  
+  g.omega = 0.1;
+  
   // for all but coarsest level
   lx = l;
   for( i=0; i<g.num_levels-1; i++ ){ 
