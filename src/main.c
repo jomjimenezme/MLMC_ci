@@ -65,7 +65,7 @@ int main( int argc, char **argv ) {
   }
   
   method_init( &argc, &argv, &l );
-  
+ 
   no_threading = (struct Thread *)malloc(sizeof(struct Thread));
   setup_no_threading(no_threading, &l);
   
@@ -145,6 +145,18 @@ int main( int argc, char **argv ) {
       h->tol_per_level[2] = sqrt(0.05);
     }
 
+    if(g.probing){
+    	graph_coloring();
+    
+    }else {
+        MALLOC(g.num_colors, int, g.num_levels);
+        for(int i = 0; i<g.num_levels; i++){
+            g.num_colors[i] = 1;
+        }
+    }
+    
+    	
+  
     // legacy line, from when this was a solver library only
     //solve_driver( &l, &threading );
 
@@ -154,7 +166,7 @@ int main( int argc, char **argv ) {
       to compute the trace. If, in turn, its value is 3, then we check the value set via <d0 trace op type>
       to set the trace-computation method
     */
-
+    
     complex_double trace;
 
     int op_type;
@@ -173,9 +185,9 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using deflated plain Hutchinson for computing the trace\n");
       END_MASTER(threadingx)
-
+      
       trace = hutchinson_driver_double( &l, &threading );
-
+      
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from deflated plain Hutchinson = %f+i%f\n", CSPLIT(trace));
@@ -184,7 +196,7 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (traditional) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
-
+     
       trace = mlmc_hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
@@ -195,7 +207,7 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (split) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
-
+      
       trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
