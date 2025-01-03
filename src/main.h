@@ -389,14 +389,6 @@
     operator_double_struct op_double;
     operator_float_struct op_float;
 
-    int probing; //contains information on whether probing is performed or not
-    int coloring_distance;
-    int coloring_method;
-    
-    int **colors; //colors of the lattice
-    int *num_colors; //number of colors at every level
-    int coloring_count;
-
     // communication
     MPI_Comm comm_cart;
     MPI_Group global_comm_group;
@@ -647,7 +639,6 @@
 #include "powerit_double.h"
 #include "hutchinson_float.h"
 #include "hutchinson_double.h"
-#include "probing.h"
 
 #ifdef HAVE_LIME
 #include <lime.h>
