@@ -64,13 +64,13 @@ void hutchinson_diver_PRECISION_free( level_struct *l, struct Thread *threading 
 void rademacher_create_PRECISION( level_struct *l, hutchinson_PRECISION_struct* h, int type, struct Thread *threading ){
   if( type==0 ){
     START_MASTER(threading)
-    vector_PRECISION_define_random_rademacher( h->rademacher_vector, 0, l->inner_vector_size, l );
+    vector_PRECISION_define_random_rademacher( h->rademacher_vector, 0, l->inner_vector_size, l);
     END_MASTER(threading)
     SYNC_MASTER_TO_ALL(threading)
   }
   else if( type==1 ){
     START_MASTER(threading)
-    vector_PRECISION_define_random_rademacher( h->rademacher_vector, 0, l->next_level->inner_vector_size, l->next_level );
+    vector_PRECISION_define_random_rademacher( h->rademacher_vector, 0, l->next_level->inner_vector_size, l->next_level);
     END_MASTER(threading)
     SYNC_MASTER_TO_ALL(threading)
    }
@@ -90,7 +90,7 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
   memset( samples, 0.0, h->max_iters[l->depth]*sizeof(complex_PRECISION) );
 
   estimate.acc_trace = 0.0;
-
+  
   for( i=0; i<h->max_iters[l->depth];i++ ){
     // 1. create Rademacher vector, stored in h->rademacher_vector
     rademacher_create_PRECISION( l, h, type, threading );
@@ -122,6 +122,7 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
       if( i > h->min_iters[l->depth] && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[l->depth]) break; 
     }
   }
+
   if(g.my_rank==0) printf("\n");
 
   estimate.sample_size = i;
@@ -222,8 +223,16 @@ complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *t
 
   // set the pointer to the finest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-  estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-  trace += estimate.acc_trace/estimate.sample_size;
+  
+  if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[0] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
+  } else {
+    estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+    trace += estimate.acc_trace / estimate.sample_size;
+  }
 
   // if deflation vectors are available
   if(g.trace_deflation_type[l->depth] != 0){
@@ -325,11 +334,25 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
 
   // for all but coarsest level
   lx = l;
-  for( i=0; i<g.num_levels-1; i++ ){ 
+  for( i=0; i<g.num_levels-1; i++ ){
+      
+    START_MASTER(threading)
+    if(g.my_rank == 0)
+        printf("\nTrace at level %d \n", i+1);
+    END_MASTER(threading)
+    
     // set the pointer to the mlmc difference operator
     h->hutch_compute_one_sample = hutchinson_mlmc_difference_PRECISION;
-    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-    trace += estimate.acc_trace/estimate.sample_size;
+    
+    if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+     }
+    } else {
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
     // if deflation vectors are available
     if(g.trace_deflation_type[lx->depth] != 0){
       trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
@@ -340,8 +363,21 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
   // coarsest level
   // set the pointer to the coarsest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-  estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-  trace += estimate.acc_trace/estimate.sample_size;
+  
+  START_MASTER(threading)
+  if(g.my_rank == 0)
+    printf("\nTrace at level %d \n", i+1);
+  END_MASTER(threading)
+
+  if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
+  } else {
+    estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+    trace += estimate.acc_trace / estimate.sample_size;
+  }
   // if deflation vectors are available
   if(g.trace_deflation_type[lx->depth] != 0){
     trace += hutchinson_deflated_direct_term_PRECISION( lx, h, threading );
@@ -363,8 +399,16 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   for( i=0; i<g.num_levels-1 ;i++ ){  
     // set the pointer to the split full rank operator
     h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
-    estimate = hutchinson_blind_PRECISION( lx, h, 1, threading );
-    trace += estimate.acc_trace/estimate.sample_size;
+    
+    if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+     }
+    } else {
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
 
     // if deflation vectors are available
     if( g.trace_deflation_type[lx->depth] != 0 ){
@@ -380,8 +424,16 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   for( i=0; i<g.num_levels-1;i++ ){      
     // set the pointer to the split orthogonal operator
     h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
-    estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
-    trace += estimate.acc_trace/estimate.sample_size;
+    
+    if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+     }
+    } else {
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
 
     // if deflation vectors are available
     if( g.trace_deflation_type[lx->depth] != 0 ){
@@ -395,13 +447,20 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   // coarsest level
   // set the pointer to the coarsest-level Hutchinson estimator
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
-  estimate = hutchinson_blind_PRECISION( lx, h, 0, threading );
+  if (g.probing) {
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+     }
+    } else {
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+        trace += estimate.acc_trace / estimate.sample_size;
+    }
+
   // if deflation vectors are available
   if(g.trace_deflation_type[lx->depth] != 0){
     trace += hutchinson_deflated_direct_term_PRECISION(lx, h, threading);
   }
-  trace += estimate.acc_trace/estimate.sample_size;
-
   return trace;
 }
 

@@ -525,6 +525,23 @@ void method_finalize( level_struct *l ) {
   
   int ls = MAX(g.num_desired_levels,2);
   
+  if(g.probing){
+      int num_processes;
+      MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+      for(int level = 0; level < g.num_levels; level++){
+          int T = g.global_lattice[level][0];
+            int Z = g.global_lattice[level][1];
+            int Y = g.global_lattice[level][2];
+            int X = g.global_lattice[level][3];
+            int size = T * Z * Y * X;
+            
+            int local_size = size/num_processes;
+          FREE(g.local_colors[level], int*, local_size);
+      }
+  }
+
+  FREE(g.num_colors, int, g.num_levels);
+  
   operator_double_free( &(g.op_double), _ORDINARY, l );
   FREE( g.odd_even_table, int, l->num_inner_lattice_sites );
   FREE( g.global_lattice[0], int, 4*ls );
@@ -541,7 +558,7 @@ void method_finalize( level_struct *l ) {
   FREE( g.trace_powerit_solver_tol, double, ls );
   FREE( g.trace_powerit_cycles, int, ls );
   FREE( g.trace_powerit_spectrum_type, int, ls );
-  
+
   FREE( g.ncycle, int, ls );
   FREE( g.relax_fac, double, ls );
 #ifdef HAVE_TM
@@ -718,7 +735,19 @@ void g_init( level_struct *l ) {
 void read_global_info( FILE *in ) {
 
   void *save_pt;
+  
+  //Setting the probing parameter_update
+  save_pt = &(g.probing); g.probing = 0;
+  read_parameter( &save_pt, "probing selection:", "%d", 1, in, _DEFAULT_SET);
+
+  if(g.probing){
+  	//Setting the coloring distance
+  	save_pt = &(g.coloring_distance); g.coloring_distance = 0;
+  	read_parameter( &save_pt, "coloring distance:", "%d", 1, in, _DEFAULT_SET);
     
+    save_pt = &(g.coloring_method); g.coloring_method = 0;
+    read_parameter( &save_pt, "coloring method:", "%d", 1, in, _DEFAULT_SET);
+  }
   // Note: There is actually no default set for the three following values
   // Though, when using the code as a library, no configuration paths are required.
   save_pt = &(g.in); g.in[0] = '\0';

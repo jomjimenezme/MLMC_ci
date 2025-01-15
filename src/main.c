@@ -65,7 +65,7 @@ int main( int argc, char **argv ) {
   }
   
   method_init( &argc, &argv, &l );
-  
+ 
   no_threading = (struct Thread *)malloc(sizeof(struct Thread));
   setup_no_threading(no_threading, &l);
   
@@ -145,6 +145,44 @@ int main( int argc, char **argv ) {
       h->tol_per_level[2] = sqrt(0.05);
     }
 
+    if(g.probing){
+    	graph_coloring();
+    }else {
+        MALLOC(g.num_colors, int, g.num_levels);
+        for(int i = 0; i<g.num_levels; i++){
+            g.num_colors[i] = 1;
+        }
+    }
+    /*
+    char filename[100];
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    sprintf(filename, "/home/papace/c_code/mpi_parallelization/print_files/colors_%d.txt", rank);
+    
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Errore nell'apertura del file");
+        return 1;
+    }
+    
+    for(int i = 0; i < g.num_levels; i++){
+        int T = g.global_lattice[i][0];
+        int Z = g.global_lattice[i][1];
+        int Y = g.global_lattice[i][2];
+        int X = g.global_lattice[i][3];
+        int num_processes;
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+        int size = T * Z * Y * X;
+        int local_size = size/num_processes;
+        fprintf(file, "\ncolors at level %d\n[", i);
+        for(int j = 0; j < local_size; j ++){
+            fprintf(file, " %d ", g.local_colors[i][j]);
+        }
+        fprintf(file, "]\n");
+    }
+    fclose(file);
+    */
     // legacy line, from when this was a solver library only
     //solve_driver( &l, &threading );
 
@@ -154,7 +192,7 @@ int main( int argc, char **argv ) {
       to compute the trace. If, in turn, its value is 3, then we check the value set via <d0 trace op type>
       to set the trace-computation method
     */
-
+    
     complex_double trace;
 
     int op_type;
@@ -173,9 +211,9 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using deflated plain Hutchinson for computing the trace\n");
       END_MASTER(threadingx)
-
+      
       trace = hutchinson_driver_double( &l, &threading );
-
+      
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from deflated plain Hutchinson = %f+i%f\n", CSPLIT(trace));
@@ -184,7 +222,7 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (traditional) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
-
+     
       trace = mlmc_hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
@@ -195,7 +233,7 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("Using (split) MGMLMC for computing the trace\n");
       END_MASTER(threadingx)
-
+      
       trace = split_mlmc_hutchinson_driver_double( &l, &threading );
 
       START_MASTER(threadingx)
