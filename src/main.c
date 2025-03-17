@@ -153,36 +153,7 @@ int main( int argc, char **argv ) {
             g.num_colors[i] = 1;
         }
     }
-    /*
-    char filename[100];
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    
-    sprintf(filename, "/home/papace/c_code/mpi_parallelization/print_files/colors_%d.txt", rank);
-    
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
-        perror("Errore nell'apertura del file");
-        return 1;
-    }
-    
-    for(int i = 0; i < g.num_levels; i++){
-        int T = g.global_lattice[i][0];
-        int Z = g.global_lattice[i][1];
-        int Y = g.global_lattice[i][2];
-        int X = g.global_lattice[i][3];
-        int num_processes;
-    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
-        int size = T * Z * Y * X;
-        int local_size = size/num_processes;
-        fprintf(file, "\ncolors at level %d\n[", i);
-        for(int j = 0; j < local_size; j ++){
-            fprintf(file, " %d ", g.local_colors[i][j]);
-        }
-        fprintf(file, "]\n");
-    }
-    fclose(file);
-    */
+   
     // legacy line, from when this was a solver library only
     //solve_driver( &l, &threading );
 
@@ -217,6 +188,7 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from deflated plain Hutchinson = %f+i%f\n", CSPLIT(trace));
+      if(g.my_rank==0 && g.probing==1) printf("Resulting variance from deflated plain Hutchinson = %f\n", g.variances[0]);
       END_MASTER(threadingx)
     } else if ( op_type==1 ) {
       START_MASTER(threadingx)
@@ -228,6 +200,13 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (traditional) MGMLMC = %f+i%f\n", CSPLIT(trace));
+      
+      if(g.my_rank == 0 && g.probing==1){
+          for(int level = 0; level < g.num_levels; level++){
+              printf("Resulting variance from (traditional) MGMLMC at level %d = %f\n", level + 1, g.variances[level]);
+          }
+      }
+      
       END_MASTER(threadingx)
     } else if ( op_type>=3 && op_type<=5 ) {
       START_MASTER(threadingx)
@@ -239,6 +218,13 @@ int main( int argc, char **argv ) {
       START_MASTER(threadingx)
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (split) MGMLMC = %f+i%f\n", CSPLIT(trace));
+      
+      if(g.my_rank == 0 && g.probing==1){
+          for(int level = 0; level < g.num_levels; level++){
+              printf("Resulting variance from (split) MGMLMC at level %d = %f\n", level + 1, g.variances[level]);
+          }
+      }
+      
       END_MASTER(threadingx)
     }
 

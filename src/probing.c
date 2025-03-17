@@ -199,6 +199,8 @@ void graph_coloring() {
     if (g.colors == NULL)
         error0("Allocation error0\n");
     
+    MALLOC(g.variances, double, g.num_levels);
+    
     for(int level = 0; level < g.num_levels; level++){
     
     int T = g.global_lattice[level][0];
@@ -270,32 +272,10 @@ void graph_coloring() {
                  
     printf("\nTime for coloring: %f seconds\n", time_taken);
     
-    /*
-    FILE *file = fopen("/home/papace/c_code/mpi_parallelization/print_files/colors.txt", "w");
-    if (file == NULL) {
-        perror("Errore nell'apertura del file");
-    }
-    
-    for(int i = 0; i < g.num_levels; i++){
-        int T = g.global_lattice[i][0];
-    int Z = g.global_lattice[i][1];
-    int Y = g.global_lattice[i][2];
-    int X = g.global_lattice[i][3];
-        int size = T * Z * Y * X;
-        printf("size = %d",size);
-        fprintf(file, "\ncolors at level %d\n[", i);
-        for(int j = 0; j < size; j ++){
-            fprintf(file, " %d ", g.colors[i][j]);
-        }
-        fprintf(file, "]\n");
-    }
-    fclose(file);
-    */
     }
     
     MPI_Barrier(MPI_COMM_WORLD);
     setup_local_colors();
-    //setup_num_colors();
 }
 
 

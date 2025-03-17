@@ -399,6 +399,8 @@
     int **local_colors; //colors of every MPI process 
     int *num_colors; //number of colors at every level
     int coloring_count;
+    
+    double *variances; //variance of the estimator at every level
 
     // communication
     MPI_Comm comm_cart;
