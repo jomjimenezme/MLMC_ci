@@ -63,27 +63,47 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
   PROF_PRECISION_START( _SET );
   if ( phi != NULL ) {
     int i;
-
-    int index, it = 0, dof = 12;
-    int time_slice = 0;
+    
+    int i_global, i_local, site_index, owner;
+    int chunk = l->inner_vector_size* g.num_processes / g.num_processes;    
+    int dof = 12; //TODO: generalize at all levels
+    int time_slice = 3;  //TODO: choose t_slice it from .ini
+    
+    for (i=start; i<end; i++){ //TODO: do with _define before the call of this funciton
+        phi[i] = 0.0;
+    }
+    
     for (int z = 0; z < g.global_lattice[0][1]; z++)
       for (int y = 0; y < g.global_lattice[0][2]; y++)
         for (int x = 0; x < g.global_lattice[0][3]; x++) {
-          index = lex_index( t, z, y, x, time_slice );
-          for(i = 0; i< dof; i++){
-            if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[dof * index + i]=  (double) (-1);
-            else phi[dof * site + i]= (PRECISION)(1);
-            it++
+          
+          site_index = lex_index( time_slice, z, y, x, g.global_lattice[0] );
+          
+          for(i_global = dof * site_index;  i_global< dof * site_index + dof; i_global++){ 
+            i_local = i_global % chunk;
+            owner = i_global / chunk;
+            if(owner == g.my_rank){
+              if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i_local ]=  (double) (-1);
+              else phi[i_local ]= (PRECISION)(1);
+              printf("global_i %d, by processor %d rank %d (local_i %d)\n", i_global, g.my_rank, owner, i);
+            }
+              
           }
         }
-  } else {
+  }else {
     error0("Error in \"vector_PRECISION_define_random\": pointer is null\n");
   }
-  if(thread == 0 && start != end)
-  PROF_PRECISION_STOP( _SET, 1 );
-
+    if(thread == 0 && start != end)
+    PROF_PRECISION_STOP( _SET, 1 );
+  exit(0);
 }
 
+/*for (int i_global = 0; i_global < N; i_global++) {
+  owner = i_global / chunk;
+  int i_local = i_global % chunk;
+  if(g.my_rank==0) printf("component %d, by processor %d (local index %d)\n", i_global, owner, i_local);
+}
+  */  
 /*void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start, int end, level_struct *l ) {
   
   int thread = omp_get_thread_num();
@@ -101,4 +121,5 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
   PROF_PRECISION_STOP( _SET, 1 );
   
 }
+
 */
