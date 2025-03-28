@@ -85,7 +85,7 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
             if(owner == g.my_rank){
               if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i_local ]=  (double) (-1);
               else phi[i_local ]= (PRECISION)(1);
-              printf("global_i %d, by processor %d rank %d (local_i %d)\n", i_global, g.my_rank, owner, i);
+              //printf("global_i %d, by processor %d rank %d (local_i %d)\n", i_global, g.my_rank, owner, i);
             }
               
           }
@@ -95,7 +95,7 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
   }
     if(thread == 0 && start != end)
     PROF_PRECISION_STOP( _SET, 1 );
-  exit(0);
+  //exit(0);
 }
 
 /*for (int i_global = 0; i_global < N; i_global++) {

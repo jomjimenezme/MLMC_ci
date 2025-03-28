@@ -176,16 +176,33 @@ int apply_solver_PRECISION( level_struct* l, struct Thread *threading ){
 // else : direct term, where type_appl is the index of the deflation vector to apply
 //        the operator on
 complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hutchinson_PRECISION_struct* h, struct Thread *threading ){
+  
   {
     int start, end;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-
+  
+    //TODO: Set a 3d-trace parameter in .ini --------------
+    int d3 = 1;
+    if(d3 == 1){
+      vector_PRECISION_copy(h->mlmc_b1, h->rademacher_vector, start, end, l );  
+      if( l->depth==0 ){
+        gamma5_PRECISION( h->rademacher_vector, h->rademacher_vector, l, threading );
+      }
+      else{
+        int startg5, endg5;
+        compute_core_start_end_custom(0, l->inner_vector_size, &startg5, &endg5, l, threading, l->num_lattice_site_var );
+        coarse_gamma5_PRECISION( h->rademacher_vector, h->rademacher_vector, startg5, endg5, l );
+      }
+    }
+  
     if ( type_appl==-1 ) {
       vector_PRECISION_copy( p->b, h->rademacher_vector, start, end, l );
     } else {
       vector_PRECISION_copy( p->b, l->powerit_PRECISION.vecs[type_appl], start, end, l );
     }
+    
+
   }
 
   {
@@ -198,7 +215,11 @@ complex_PRECISION hutchinson_plain_PRECISION( int type_appl, level_struct *l, hu
     complex_PRECISION aux;
     gmres_PRECISION_struct* p = get_p_struct_PRECISION( l );
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-
+    
+    int d3 = 1;
+    if(d3 == 1){
+      vector_PRECISION_copy(h->rademacher_vector, h->mlmc_b1, start, end, l );  
+    }
     if ( type_appl==-1 ) {
       if(g.trace_deflation_type[l->depth] != 0){
         hutchinson_deflate_vector_PRECISION(p->x, l, threading); 
