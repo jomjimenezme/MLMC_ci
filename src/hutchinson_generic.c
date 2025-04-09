@@ -318,7 +318,7 @@ complex_PRECISION hutchinson_mlmc_difference_PRECISION( int type_appl, level_str
     int d3 = 1;
     int start, end;
     compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
-    if(d3 == 1){
+    if(d3 == 1){//restore copy
       vector_PRECISION_copy(h->rademacher_vector, h->mlmc_b1, start, end, l );  
     }
     if ( type_appl==-1 ) {
@@ -668,19 +668,16 @@ struct sample hutchinson_blind_g5_PRECISION( level_struct *l, int depth, hutchin
 
   int start, end;
   level_struct* lx = l;
-  for (int d = 0; d < depth; d++){
+  get_correct_l_PRECISION( depth, lx );
+  /*for (int d = 0; d < depth; d++){
     lx = lx->next_level;
- /*if(depth==1){
-  print f("l %d \t lx %d\n",l->depth,lx->depth);fflush(0);
-     //exit(0);
   }*/
-  }
 
   // TODO : move this allocation to some init function
   complex_PRECISION* samples = (complex_PRECISION*) malloc( h->max_iters[lx->depth]*sizeof(complex_PRECISION) );
   memset( samples, 0.0, h->max_iters[lx->depth]*sizeof(complex_PRECISION) );
 
-  level_struct* l_restrict;
+  level_struct* l_restrict = l;
 
   for( i=0; i<h->max_iters[lx->depth];i++ ){
     
@@ -688,7 +685,7 @@ struct sample hutchinson_blind_g5_PRECISION( level_struct *l, int depth, hutchin
     rademacher_create_PRECISION( l, h, type, threading );
     //compute_core_start_end( 0, l->inner_vector_size, &start, &end, l, threading );
     //vector_PRECISION_copy( h->mlmc_testing, h->rademacher_vector, start, end, l );
-    level_struct* l_restrict = l;  
+    l_restrict = l;  
     for (int d = 0; d < depth; d++){
        apply_R_PRECISION( h->rademacher_vector, h->rademacher_vector, l_restrict, threading );
        l_restrict = l_restrict->next_level;
