@@ -156,6 +156,8 @@ int main( int argc, char **argv ) {
     */
 
     complex_double trace;
+    int rnd_seed = 1234;
+    srand( time( 0 ) + rnd_seed*g.my_rank );
 
     int op_type;
     if ( g.trace_deflation_type[0]==1 || g.trace_deflation_type[0]==2 ) {

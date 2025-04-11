@@ -90,7 +90,8 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
   memset( samples, 0.0, h->max_iters[l->depth]*sizeof(complex_PRECISION) );
 
   estimate.acc_trace = 0.0;
-
+  double t0 = MPI_Wtime();
+  
   for( i=0; i<h->max_iters[l->depth];i++ ){
     // 1. create Rademacher vector, stored in h->rademacher_vector
     rademacher_create_PRECISION( l, h, type, threading );
@@ -122,7 +123,11 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
       if( i > h->min_iters[l->depth] && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[l->depth]) break; 
     }
   }
-  if(g.my_rank==0) printf("\n");
+  double t1 = MPI_Wtime();
+  if(g.my_rank==0){
+    printf("\n");
+    printf("Time for sample computation (Avg.): \t %f\n\n", (t1-t0)/h->max_iters[l->depth]);
+  }
 
   estimate.sample_size = i;
 
@@ -668,17 +673,18 @@ struct sample hutchinson_blind_g5_PRECISION( level_struct *l, int depth, hutchin
 
   int start, end;
   level_struct* lx = l;
-  get_correct_l_PRECISION( depth, lx );
-  /*for (int d = 0; d < depth; d++){
+  //get_correct_l_PRECISION( depth, lx );
+  for (int d = 0; d < depth; d++){
     lx = lx->next_level;
-  }*/
-
+  }
+  //if(g.my_rank==0)printf("lx_depth = %d\n", lx->depth);
   // TODO : move this allocation to some init function
   complex_PRECISION* samples = (complex_PRECISION*) malloc( h->max_iters[lx->depth]*sizeof(complex_PRECISION) );
   memset( samples, 0.0, h->max_iters[lx->depth]*sizeof(complex_PRECISION) );
 
   level_struct* l_restrict = l;
 
+  double t0 = MPI_Wtime();
   for( i=0; i<h->max_iters[lx->depth];i++ ){
     
 // 1. create Rademacher vector, stored in h->rademacher_vector
@@ -689,7 +695,7 @@ struct sample hutchinson_blind_g5_PRECISION( level_struct *l, int depth, hutchin
     for (int d = 0; d < depth; d++){
        apply_R_PRECISION( h->rademacher_vector, h->rademacher_vector, l_restrict, threading );
        l_restrict = l_restrict->next_level;
-
+       //if(g.my_rank==0)printf("restricting = %d times\n", d+1);fflush(0);
     /*  if(depth==1){
   printf("%d d=%d\n",l_restrict->depth,d);fflush(0);
      //exit(0);
@@ -728,11 +734,15 @@ struct sample hutchinson_blind_g5_PRECISION( level_struct *l, int depth, hutchin
       if( i > h->min_iters[lx->depth] && RMSD < cabs(trace) * h->trace_tol * h->tol_per_level[lx->depth]) break; 
     }
   }
-  if(g.my_rank==0) printf("\n");
-
+  double t1 = MPI_Wtime();
+  if(g.my_rank==0){
+    printf("\n");
+    printf("Time for sample computation (Avg.): \t %f\n\n", (t1-t0)/h->max_iters[lx->depth]);
+  }
   estimate.sample_size = i;
 
   free(samples);
 
+  
   return estimate;
 }
