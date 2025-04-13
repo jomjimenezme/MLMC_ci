@@ -61,6 +61,10 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
   int thread = omp_get_thread_num();
   if(thread == 0 && start != end)
     PROF_PRECISION_START( _SET );
+  for (i = start; i < end; i++) {
+    phi[i] = 0.0;
+  }
+
   if(thread == 0){
     if ( phi != NULL ) {
       int i;
@@ -80,11 +84,7 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
       // Number of dofs owned by each process //TODO: is always even?
       int chunk = total_dof / g.num_processes;
       
-      // Zero out local phi vector TODO:use memset
-      for (i = start; i < end; i++) {
-        phi[i] = 0.0;
-      }
-      
+     
       // Loop over spatial coordinates 
       for (int z = 0; z < g.global_lattice[0][1]; z++) {
         for (int y = 0; y < g.global_lattice[0][2]; y++) {
