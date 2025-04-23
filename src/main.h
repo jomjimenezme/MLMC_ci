@@ -404,7 +404,7 @@
         interpolation, randomize, *num_eig_vect, num_coarse_eig_vect, kcycle, mixed_precision,
         restart, max_restart, kcycle_restart, kcycle_max_restart, coarse_iter, coarse_restart,
         *trace_deflation_type, *trace_deflation_nr_vectors, trace_op_type, *trace_max_iters,
-        *trace_min_iters, *trace_powerit_cycles, *trace_powerit_spectrum_type;
+        *trace_min_iters, *trace_powerit_cycles, *trace_powerit_spectrum_type, time_slice;
     double tol, coarse_tol, kcycle_tol, csw, rho, *relax_fac, *trace_powerit_solver_tol;
 #ifdef GCRODR
     int gcrodr_k, gcrodr_k_setup, gcrodr_k_solve;
