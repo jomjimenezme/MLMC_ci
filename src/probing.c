@@ -191,6 +191,8 @@ void graph_coloring() {
     MALLOC(g.variances, double, g.num_levels);
     
     for(int level = 0; level < g.num_levels; level++){
+
+    g.variances[level] = 0;
     
     int T = g.global_lattice[level][0];
     int Z = g.global_lattice[level][1];
