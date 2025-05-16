@@ -1,22 +1,22 @@
 #!/bin/bash
-#SBATCH --job-name=testjob
+#SBATCH --account=mul-tra
+#SBATCH --job-name=trace_estimation
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
-#SBATCH --cpus-per-task=4
-#SBATCH --output=mpi-out.%j
-#SBATCH --error=mpi-err.%j
-#SBATCH --time=06:45:00
+#SBATCH --cpus-per-task=1
+#SBATCH --output=result
+#SBATCH --error=err_file
+#SBATCH --time=00:40:00
+#SBATCH --partition=batch
+#SBATCH --mail-type=ALL           # Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=mariopapacee@gmail.com  # Your email address
 
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-module load 2022a
 module load GCC/11.3.0
 module load OpenMPI/4.1.4
 
-date
 make clean
-make -j 64
+make -f Makefile -j 32
 
-
-
-. run -i "4sample64.ini"
+. run_slurm -i "64_32_32_32.ini"
 date
