@@ -4,8 +4,8 @@
 #SBATCH --nodes=56
 #SBATCH --ntasks-per-node=27
 #SBATCH --cpus-per-task=1
-#SBATCH --output=mpi-out.%j
-#SBATCH --error=mpi-err.%j
+#SBATCH --output=result
+#SBATCH --error=err_file
 #SBATCH --time=01:00:00
 #SBATCH --partition=batch
 
