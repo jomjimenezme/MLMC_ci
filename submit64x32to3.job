@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --account=mul-tra
-#SBATCH --job-name=trace_estimation
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=16
+#SBATCH --job-name=64x32to3_trace
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=1
 #SBATCH --output=result
 #SBATCH --error=err_file
-#SBATCH --time=00:40:00
+#SBATCH --time=02:00:00
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL           # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=mariopapacee@gmail.com  # Your email address
@@ -18,5 +18,5 @@ module load OpenMPI/4.1.4
 make clean
 make -f Makefile -j 32
 
-. run_slurm -i "64_32_32_32.ini"
+. run_slurm -i "64x32to3.ini"
 date
