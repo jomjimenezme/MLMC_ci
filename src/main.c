@@ -219,12 +219,6 @@ int main( int argc, char **argv ) {
       if(g.my_rank==0) printf("\n");
       if(g.my_rank==0) printf("Resulting trace from (split) MGMLMC = %f+i%f\n", CSPLIT(trace));
       
-      if(g.my_rank == 0 && g.probing==1){
-          for(int level = 0; level < g.num_levels; level++){
-              printf("Resulting variance from (split) MGMLMC at level %d = %f\n", level + 1, g.variances[level]);
-          }
-      }
-      
       END_MASTER(threadingx)
     }
 
