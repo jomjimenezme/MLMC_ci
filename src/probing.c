@@ -192,7 +192,7 @@ void graph_coloring() {
     
     for(int level = 0; level < g.num_levels; level++){
 
-    g.variances[level] = 0;
+    g.variances[level] = 0.0;
     
     int T = g.global_lattice[level][0];
     int Z = g.global_lattice[level][1];

@@ -140,7 +140,7 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
 
   if(g.my_rank==0){
 	  time = time/i;
-	  printf("\nAverage time for a sample at level %d = %f", l->depth + 1, time);
+	  printf("\nAverage time for a sample at level %d = %f \n", l->depth + 1, time);
   }
 
   if(g.my_rank==0) printf("\n");
@@ -416,7 +416,11 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
 
   // for all but coarsest level
   lx = l;
-  for( i=0; i<g.num_levels-1 ;i++ ){  
+  for( i=0; i<g.num_levels-1 ;i++ ){
+
+    if(g.my_rank == 0)
+        printf("\nTrace at level %d split full rank operator\n", i+1);
+
     // set the pointer to the split full rank operator
     h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
     
@@ -424,6 +428,10 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
+     }
+    if(g.my_rank == 0){
+        printf("\nTrace at level %d split full rank operator, Variance = %f\n", i+1, g.variances[i]);
+        g.variances[i]=0;
      }
     } else {
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
@@ -441,7 +449,12 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
 
   // for all but coarsest level
   lx = l;
-  for( i=0; i<g.num_levels-1;i++ ){      
+  for( i=0; i<g.num_levels-1;i++ ){
+
+    if(g.my_rank == 0){
+	  g.variances[i] = 0.0;
+          printf("\nTrace at level %d split orthogonal operator\n", i+1);
+    }	  
     // set the pointer to the split orthogonal operator
     h->hutch_compute_one_sample = hutchinson_split_orthogonal_PRECISION;
     
@@ -450,6 +463,8 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
      }
+     if(g.my_rank == 0)
+        printf("\nTrace at level %d split orthogonal operator, Variance = %f\n", i+1, g.variances[i]);
     } else {
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
@@ -466,12 +481,17 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
 
   // coarsest level
   // set the pointer to the coarsest-level Hutchinson estimator
+  if(g.my_rank == 0)
+          printf("\nTrace at level %d \n", g.num_levels);
+
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
   if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
      }
+     if(g.my_rank == 0)
+        printf("\nTrace at level %d split orthogonal operator, Variance = %f\n", g.num_levels, g.variances[g.num_levels-1]);
     } else {
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
