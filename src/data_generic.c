@@ -64,11 +64,12 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
     int i;
     int j = 0;
     
-    int dof;
-    int num_processes;
+    //int dof;
+    //int num_processes;
     int size = g.global_lattice[l->depth][0]*g.global_lattice[l->depth][1]*g.global_lattice[l->depth][2]*g.global_lattice[l->depth][3];
-    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
-    dof = num_processes*(end - start)/size; //not optimized, better to define it in hutchinson_blind_PRECISION or in a driver
+    //MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+    //dof = num_processes*(end - start)/size; //not optimized, better to define it in hutchinson_blind_PRECISION or in a driver
+    int dof = l->num_lattice_site_var;
     
     for ( i=start; i<end; i++ ){
       if(g.probing){
@@ -80,7 +81,7 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
             if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i]=  (double) (-1);
             else phi[i]= (PRECISION)(1);
          }else{
-            phi[i] = 0;
+            phi[i] = 0.0;
          }
       }else{
         if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i]=  (double) (-1);
