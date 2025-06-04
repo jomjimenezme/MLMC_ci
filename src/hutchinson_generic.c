@@ -425,7 +425,7 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
     h->hutch_compute_one_sample = hutchinson_split_intermediate_PRECISION;
     
     if (g.probing) {
-    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+    for (g.coloring_count = 1; g.coloring_count < g.num_colors[i+1] + 1; g.coloring_count++){
         estimate = hutchinson_blind_PRECISION(lx, h, 1, threading);
         trace += estimate.acc_trace / estimate.sample_size;
      }
