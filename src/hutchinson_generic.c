@@ -90,6 +90,7 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
   memset( samples, 0.0, h->max_iters[l->depth]*sizeof(complex_PRECISION) );
 
   estimate.acc_trace = 0.0;
+  PRECISION t0 = MPI_Wtime();
 
   for( i=0; i<h->max_iters[l->depth];i++ ){
     // 1. create Rademacher vector, stored in h->rademacher_vector
@@ -125,6 +126,10 @@ struct sample hutchinson_blind_PRECISION( level_struct *l, hutchinson_PRECISION_
   if(g.my_rank==0) printf("\n");
 
   estimate.sample_size = i;
+ 
+  PRECISION t1 = MPI_Wtime();
+  if(g.my_rank==0) printf("\n Average Op time = %f\n", (t1-t0)/i);
+
 
   free(samples);
 
