@@ -178,6 +178,10 @@ void graph_coloring() {
     MALLOC(g.num_colors, int, g.num_levels);
     
     if(g.my_rank == 0){
+
+    printf("\nProbing = %d\n", g.probing);
+    printf("Coloring_distance = %d\n", g.coloring_distance);
+    printf("Coloring_method = %d\n", g.coloring_method);
         
     double time_taken;
     
