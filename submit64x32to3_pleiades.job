@@ -1,13 +1,11 @@
 #!/bin/bash
-#SBATCH --account=mul-tra
-#SBATCH --job-name=128x64to3_trace
-#SBATCH --nodes=8
-#SBATCH --ntasks-per-node=16
+#SBATCH --job-name=64x32to3_trace
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=1
 #SBATCH --output=result
 #SBATCH --error=err_file
-#SBATCH --time=04:00:00
-#SBATCH --partition=batch
+#SBATCH --time=02:00:00
 #SBATCH --mail-type=ALL           # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=mariopapacee@gmail.com  # Your email address
 
@@ -17,7 +15,7 @@ module load GCC/11.3.0
 module load OpenMPI/4.1.4
 
 make clean
-make -f lime_makefile -j 32
+make -f Makefile -j 32
 
-. run_slurm -i "128x64to3.ini"
+. run -i "64x32to3.ini"
 date
