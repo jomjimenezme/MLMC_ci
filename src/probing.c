@@ -19,6 +19,7 @@ void vector_copy(int *dest, int *src, int size) {
     }
 }
 
+/*
 void setup_local_colors(){
     
     int num_processes;
@@ -74,6 +75,153 @@ void setup_local_colors(){
     MPI_Bcast(g.num_colors, g.num_levels, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Barrier(MPI_COMM_WORLD);
    
+}
+*/
+
+void setup_local_colors(){
+
+    int num_processes;
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+
+    // Cartisian Topology variables TODO: dims should be read from l->global_splitting
+    int dims[4], periods[4], coords[4];
+    MPI_Cart_get(g.comm_cart, 4, dims, periods, coords);
+
+    g.local_colors = (int**)malloc(g.num_levels * sizeof(int*));
+
+    for(int level = 0; level < g.num_levels; level++){
+
+        // int size = T * Z * Y * X;
+        // int local_size = size/num_processes;
+        // int *current_level_colors;
+
+        //global and local sizes in terms of cartisian grid
+        int T = g.global_lattice[level][0];
+        int Z = g.global_lattice[level][1];
+        int Y = g.global_lattice[level][2];
+        int X = g.global_lattice[level][3];
+
+        int Nt_loc = T / dims[0];
+        int Nz_loc = Z / dims[1];
+        int Ny_loc = Y / dims[2];
+        int Nx_loc = X / dims[3];
+
+        const int global_size = T * Z * Y * X;
+        const int local_size  = Nt_loc * Nz_loc * Ny_loc * Nx_loc;
+
+        //if(g.my_rank == 0){
+        //    MALLOC(current_level_colors, int, size);
+        //    vector_copy(current_level_colors, g.colors[level], size);
+        //}
+
+        // buffer holding the FULL global colour array on every rank
+        int *global_colors = NULL;
+        if (g.my_rank == 0) {
+            global_colors = g.colors[level];       //already allocated
+        } else {
+            MALLOC(global_colors, int, global_size);
+        }
+
+
+        //g.local_colors[level] = NULL;
+        //MALLOC(g.local_colors[level], int, local_size);
+
+        //int *current_level_local_colors;
+        //MALLOC(current_level_local_colors, int, local_size);
+
+        //MPI_Barrier(MPI_COMM_WORLD);
+
+        //MPI_Scatter(current_level_colors, local_size, MPI_INT,
+        //        current_level_local_colors, local_size, MPI_INT,
+        //        0, MPI_COMM_WORLD);
+
+        //vector_copy(g.local_colors[level], current_level_local_colors, local_size);
+
+        //FREE(current_level_colors, int, size);
+        //FREE(current_level_local_colors, int, local_size);
+
+        // broadcast the full colour array from rank 0
+        MPI_Bcast(global_colors, global_size, MPI_INT, 0, g.comm_cart);
+
+        // allocate and fill local colour array for this level
+        MALLOC(g.local_colors[level], int, local_size);
+
+        // Initial global coordinates based on cartesian coordinates
+        int t0 = coords[0] * Nt_loc;
+        int z0 = coords[1] * Nz_loc;
+        int y0 = coords[2] * Ny_loc;
+        int x0 = coords[3] * Nx_loc;
+
+        // loop over local linear index  idx
+        int idx = 0;
+        for (int lt = 0; lt < Nt_loc; lt++)
+            for (int lz = 0; lz < Nz_loc; lz++)
+                for (int ly = 0; ly < Ny_loc; ly++)
+                    for (int lx = 0; lx < Nx_loc; lx++, idx++)
+                    {
+                        // global coordinates
+                        int t = t0 + lt;
+                        int z = z0 + lz;
+                        int y = y0 + ly;
+                        int x = x0 + lx;
+
+                        // global site with t,z,y,x ordering TODO: use lex_index?
+                        int gsite = ((t * Z + z) * Y + y) * X + x;
+                        g.local_colors[level][idx] = global_colors[gsite];
+                    }
+
+    //ranks other than 0 allocated a temporary copy -> free it
+    if (g.my_rank != 0){
+        FREE(global_colors, int, global_size);
+    }
+
+
+    // TODO: make it a function or remove this block
+ /*   // Debug print: global colour array on rank 0
+        if (g.my_rank == 0) {
+            printf("[Rank %d] Global color array at level %d:\n", g.my_rank, level);
+            for (int i = 0; i < global_size; i++)
+                printf("%d ", global_colors[i]);
+            printf("\n");
+        }
+*/
+        MPI_Barrier(g.comm_cart);
+
+  /*  // Debug print: local colour arrays
+        for (int r = 0; r < num_processes; r++) {
+            if (g.my_rank == r) {
+                printf("[Rank %d] Local color array at level %d:\n", g.my_rank, level);
+                for (int i = 0; i < local_size; i++)
+                    printf("%d ", g.local_colors[level][i]);
+                printf("\n");
+                fflush(stdout);
+            }
+            MPI_Barrier(g.comm_cart);
+        }
+*/
+
+
+    }
+
+
+
+    //if(g.my_rank==0){
+    //    for(int i = 0; i < g.num_levels; i++){
+	  //int T = g.global_lattice[i][0];
+	  //int Z = g.global_lattice[i][1];
+	  //int Y = g.global_lattice[i][2];
+	  //int X = g.global_lattice[i][3];
+    //      int size = T * Z * Y * X;
+    //      FREE(g.colors[i], int*, size );
+    //  }
+    //}
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Bcast(g.num_colors, g.num_levels, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(g.num_colors, g.num_levels, MPI_INT, 0, g.comm_cart);
+    //print_colors();
+    MPI_Barrier(MPI_COMM_WORLD);
+
 }
 
 void coloring_scheme(){

@@ -490,7 +490,7 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
         trace += estimate.acc_trace / estimate.sample_size;
      }
      if(g.my_rank == 0)
-        printf("\nTrace at level %d split orthogonal operator, Variance = %f\n", g.num_levels, g.variances[g.num_levels-1]);
+        printf("\nTrace at level %d coarsest level operator, Variance = %f\n", g.num_levels, g.variances[g.num_levels-1]);
     } else {
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
