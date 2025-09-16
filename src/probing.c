@@ -85,11 +85,6 @@ void dilution_check(){
     exit(1);
   }
 
-  if(g.dilution != 1 && g.coloring_method > 1){
-    printf("\nError: dilution on coarser levels not implemented yet");
-    exit(1);
-  }
-
   if(g.dilution == 1)
     printf("\nNo dilution");
 
@@ -244,6 +239,7 @@ void setup_local_colors(){
     MPI_Barrier(MPI_COMM_WORLD);
     //MPI_Bcast(g.num_colors, g.num_levels, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(g.num_colors, g.num_levels, MPI_INT, 0, g.comm_cart);
+    MPI_Bcast(g.dilution_ml, g.num_levels, MPI_INT, 0, g.comm_cart);
     //print_colors();
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -349,6 +345,7 @@ void generate_neighbors(int t, int z, int y, int x, int **neighbors, int *num_ne
 void graph_coloring() {
     
     MALLOC(g.num_colors, int, g.num_levels);
+    MALLOC(g.dilution_ml, int, g.num_levels);
     
     if(g.my_rank == 0){
 
@@ -370,6 +367,11 @@ void graph_coloring() {
     MALLOC(g.variances, double, g.num_levels);
     
     for(int level = 0; level < g.num_levels; level++){
+
+    if(level == 0)
+      g.dilution_ml[level] = g.dilution;
+    else
+      g.dilution_ml[level] = 1;
 
     g.variances[level] = 0.0;
     

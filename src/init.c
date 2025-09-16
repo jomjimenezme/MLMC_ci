@@ -542,6 +542,7 @@ void method_finalize( level_struct *l ) {
   }
 
   FREE(g.num_colors, int, g.num_levels);
+  FREE(g.dilution_ml, int, g.num_levels);
   
   operator_double_free( &(g.op_double), _ORDINARY, l );
   FREE( g.odd_even_table, int, l->num_inner_lattice_sites );
