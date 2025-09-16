@@ -146,12 +146,12 @@ int main( int argc, char **argv ) {
     }
 
     if(g.probing){
-    	graph_coloring();
+      graph_coloring();
     }else {
-        MALLOC(g.num_colors, int, g.num_levels);
-        for(int i = 0; i<g.num_levels; i++){
-            g.num_colors[i] = 1;
-        }
+       MALLOC(g.num_colors, int, g.num_levels);
+       for(int i = 0; i<g.num_levels; i++){
+         g.num_colors[i] = 1;
+       }
     }
    
     // legacy line, from when this was a solver library only

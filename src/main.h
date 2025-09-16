@@ -399,6 +399,7 @@
     int **local_colors; //colors of every MPI process 
     int *num_colors; //number of colors at every level
     int coloring_count;
+    int dilution;
     
     double *variances; //variance of the estimator at every level
 

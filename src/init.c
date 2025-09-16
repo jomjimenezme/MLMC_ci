@@ -742,12 +742,15 @@ void read_global_info( FILE *in ) {
   read_parameter( &save_pt, "probing selection:", "%d", 1, in, _DEFAULT_SET);
 
   if(g.probing){
-  	//Setting the coloring distance
-  	save_pt = &(g.coloring_distance); g.coloring_distance = 0;
-  	read_parameter( &save_pt, "coloring distance:", "%d", 1, in, _DEFAULT_SET);
+    //Setting the coloring distance
+    save_pt = &(g.coloring_distance); g.coloring_distance = 0;
+    read_parameter( &save_pt, "coloring distance:", "%d", 1, in, _DEFAULT_SET);
     
     save_pt = &(g.coloring_method); g.coloring_method = 0;
     read_parameter( &save_pt, "coloring:", "%d", 1, in, _DEFAULT_SET);
+
+    save_pt = &(g.dilution); g.dilution = 1;
+    read_parameter( &save_pt, "dilution:", "%d", 1, in, _DEFAULT_SET);
   }
   // Note: There is actually no default set for the three following values
   // Though, when using the code as a library, no configuration paths are required.
