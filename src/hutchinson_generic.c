@@ -246,8 +246,11 @@ complex_PRECISION hutchinson_driver_PRECISION( level_struct *l, struct Thread *t
   
   if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[0] + 1; g.coloring_count++){
-        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
-        trace += estimate.acc_trace / estimate.sample_size;
+	for(g.dilution_count = 1; g.dilution_count < g.dilution + 1; g.dilution_count++){
+	  if(g.my_rank == 0) printf("\nColor %d, dilution %d", g.coloring_count, g.dilution_count);
+          estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+          trace += estimate.acc_trace / estimate.sample_size;
+	}
     }
   } else {
     estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
@@ -366,8 +369,11 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
     
     if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
-        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
-        trace += estimate.acc_trace / estimate.sample_size;
+	for(g.dilution_count = 1; g.dilution_count < g.dilution_ml[i] + 1; g.dilution_count++){
+          if(g.my_rank == 0) printf("\nLevel %d color %d, dilution %d", i, g.coloring_count, g.dilution_count);
+          estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
+          trace += estimate.acc_trace / estimate.sample_size;
+	}
      }
     } else {
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
@@ -391,8 +397,11 @@ complex_PRECISION mlmc_hutchinson_driver_PRECISION( level_struct *l, struct Thre
 
   if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+      for(g.dilution_count = 1; g.dilution_count < g.dilution_ml[i] + 1; g.dilution_count++){
+        if(g.my_rank == 0) printf("\nLevel %d color %d, dilution %d", i, g.coloring_count, g.dilution_count);
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
+      }
     }
   } else {
     estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
@@ -426,8 +435,11 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
     
     if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i+1] + 1; g.coloring_count++){
-        estimate = hutchinson_blind_PRECISION(lx, h, 1, threading);
+      for(g.dilution_count = 1; g.dilution_count < g.dilution_ml[i+1] + 1; g.dilution_count++){
+        printf("\nLevel %d color %d, dilution %d", g.coloring_count, g.dilution_count);
+        estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
+      }
      }
     if(g.my_rank == 0){
         printf("\nTrace at level %d split full rank operator, Variance = %f\n", i+1, g.variances[i]);
@@ -459,8 +471,11 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
     
     if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+      for(g.dilution_count = 1; g.dilution_count < g.dilution_ml[i] + 1; g.dilution_count++){
+        printf("\nLevel %d color %d, dilution %d", g.coloring_count, g.dilution_count);
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
+      }
      }
      if(g.my_rank == 0)
         printf("\nTrace at level %d split orthogonal operator, Variance = %f\n", i+1, g.variances[i]);
@@ -486,8 +501,11 @@ complex_PRECISION split_mlmc_hutchinson_driver_PRECISION( level_struct *l, struc
   h->hutch_compute_one_sample = hutchinson_plain_PRECISION;
   if (g.probing) {
     for (g.coloring_count = 1; g.coloring_count < g.num_colors[i] + 1; g.coloring_count++){
+      for(g.dilution_count = 1; g.dilution_count < g.dilution_ml[i] + 1; g.dilution_count++){
+        if(g.my_rank == 0) printf("\nLevel %d color %d, dilution %d", g.coloring_count, g.dilution_count);
         estimate = hutchinson_blind_PRECISION(lx, h, 0, threading);
         trace += estimate.acc_trace / estimate.sample_size;
+      }
      }
      if(g.my_rank == 0)
         printf("\nTrace at level %d coarsest level operator, Variance = %f\n", g.num_levels, g.variances[g.num_levels-1]);

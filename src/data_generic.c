@@ -55,6 +55,20 @@ void vector_PRECISION_define_random( vector_PRECISION phi, int start, int end, l
     PROF_PRECISION_STOP( _SET, 1 );
 }
 
+int compute_dilution_idx_PRECISION(level_struct *l, int global_idx, int dof){
+  int dilution_idx = 1;
+  int dilution_group = dof/g.dilution_ml[l->depth];
+
+  if(g.dilution != 3 && l->depth == 0)
+    dilution_idx = (global_idx/dilution_group)%g.dilution_ml[l->depth] + 1;
+  
+  if(g.dilution == 3 && l->depth == 0)
+    dilution_idx = global_idx%3 + 1;
+
+  return dilution_idx;
+
+}
+
 void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start, int end, level_struct *l ) {
   
   int thread = omp_get_thread_num();
@@ -70,14 +84,16 @@ void vector_PRECISION_define_random_rademacher( vector_PRECISION phi, int start,
     //MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
     //dof = num_processes*(end - start)/size; //not optimized, better to define it in hutchinson_blind_PRECISION or in a driver
     int dof = l->num_lattice_site_var;
-    
+
     for ( i=start; i<end; i++ ){
       if(g.probing){
         
          if(i%dof == 0 && i > 0)
             j++;
 
-         if(g.local_colors[l->depth][j] == g.coloring_count){
+	 int dilution_idx = compute_dilution_idx_PRECISION(l, i, dof);
+
+         if(g.local_colors[l->depth][j] == g.coloring_count && dilution_idx == g.dilution_count){
             if(   (PRECISION)((double)rand()<(double)RAND_MAX/2.0)   ) phi[i]=  (double) (-1);
             else phi[i]= (PRECISION)(1);
          }else{

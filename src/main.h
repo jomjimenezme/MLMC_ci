@@ -401,6 +401,7 @@
     int coloring_count;
     int dilution;
     int *dilution_ml;
+    int dilution_count;
     
     double *variances; //variance of the estimator at every level
 
