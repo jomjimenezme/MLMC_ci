@@ -78,6 +78,31 @@ void setup_local_colors(){
 }
 */
 
+void dilution_check(){
+
+  if(g.dilution != 1 && g.dilution != 2 && g.dilution != 3 && g.dilution != 12){
+    printf("\nError: choose a correct dilution value (1, 2, 3, 12)");
+    exit(1);
+  }
+
+  if(g.dilution != 1 && g.coloring_method > 1){
+    printf("\nError: dilution on coarser levels not implemented yet");
+    exit(1);
+  }
+
+  if(g.dilution == 1)
+    printf("\nNo dilution");
+
+  if(g.dilution == 2)
+    printf("\nSpin dilution");
+
+  if(g.dilution == 3)
+    printf("\nColor dilution");
+
+  if(g.dilution == 12)
+    printf("\nSpin-Color dilution");
+}
+
 void setup_local_colors(){
 
     int num_processes;
@@ -330,6 +355,8 @@ void graph_coloring() {
     printf("\nProbing = %d\n", g.probing);
     printf("Coloring_distance = %d\n", g.coloring_distance);
     printf("Coloring_method = %d\n", g.coloring_method);
+
+    dilution_check();
         
     double time_taken;
     
