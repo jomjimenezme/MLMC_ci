@@ -756,15 +756,6 @@ void read_global_info( FILE *in ) {
     //Number of colors at the finest level
     save_pt = &(g.nc); g.nc = 1;
     read_parameter( &save_pt, "number of colors:", "%d", 1, in, _DEFAULT_SET);
-    
-    //sigma
-    for(int i=0; i<4; i++){
-      char filename[50];
-      sprintf(filename, "sigma_%d:", i);
-      
-      save_pt = &(g.sigma[i]); g.sigma[i] = 1;
-      read_parameter( &save_pt, filename, "%d", 1, in, _DEFAULT_SET);
-    }
   }
   // Note: There is actually no default set for the three following values
   // Though, when using the code as a library, no configuration paths are required.

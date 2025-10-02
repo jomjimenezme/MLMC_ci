@@ -78,6 +78,46 @@ void setup_local_colors(){
 }
 */
 
+void get_sigma(){
+  
+  if(g.coloring_distance == 1){
+    g.sigma[0] = 1;
+    g.sigma[1] = 1;
+    g.sigma[2] = 1;
+    g.sigma[3] = 1;
+    
+    g.nc = 2;
+  }
+  
+  if(g.coloring_distance == 2){
+    g.sigma[0] = 1;
+    g.sigma[1] = 2;
+    g.sigma[2] = 3;
+    g.sigma[3] = 4;
+    
+    g.nc = 10;
+  }
+  
+  if(g.coloring_distance == 3){
+    g.sigma[0] = 1;
+    g.sigma[1] = 5;
+    g.sigma[2] = 55;
+    g.sigma[3] = 61;
+    
+    g.nc = 16;
+  }
+  
+  if(g.coloring_distance == 4){
+    g.sigma[0] = 1;
+    g.sigma[1] = 8;
+    g.sigma[2] = 12;
+    g.sigma[3] = 18;
+    
+    g.nc = 64;
+  }
+  
+}
+
 void dilution_check(){
 
   if(g.dilution != 1 && g.dilution != 2 && g.dilution != 3 && g.dilution != 12){
@@ -244,58 +284,6 @@ void setup_local_colors(){
     MPI_Barrier(MPI_COMM_WORLD);
 
 }
-
-void coloring_scheme(){
-    
-//colors_init();
-
-for(int level = 0; level < g.num_levels; level++){
-    
-    int T = g.global_lattice[level][0];
-    int Z = g.global_lattice[level][1];
-    int Y = g.global_lattice[level][2];
-    int X = g.global_lattice[level][3];
-    
-    int total_points = T * Z * Y * X;
-    
-    int size[4];
-    
-    size[0] = T;
-    size[1] = Z;
-    size[2] = Y;
-    size[3] = X;
-    
-    int coordinates[4];
-    
-    MALLOC(g.colors[level], int, total_points);
-    
-    for(int t = 0; t < T; t++){
-        coordinates[0] = t;
-        for(int z = 0; z < Z; z++){
-            coordinates[1] = z;
-            for(int y = 0; y < Y; y++){
-                coordinates[2] = y;
-                for(int x = 0; x < X; x++){
-                    coordinates[3] = x;
-                    int idx = lex_index(t, z, y, x, size);
-
-                    int col = 0;
-                    int power = 1;
-                    for(int k = 0; k<4; k++){
-                        int w_tilde = coordinates[k]%(g.coloring_distance + 1);
-                        col += w_tilde * power;
-                        power *= (g.coloring_distance + 1);
-	               }    
-	               g.colors[level][idx] = col + 1;
-               }
-            }
-        }
-    }
-    g.num_colors[level] = max(g.colors[level], total_points);
-}
-
-}
-
 
 void generate_neighbors(int t, int z, int y, int x, int **neighbors, int *num_neighbors, int size[4]) {
     int T = size[0];
@@ -471,8 +459,11 @@ void graph_coloring(){
     printf("\nProbing = %d\n", g.probing);
     printf("Coloring_distance = %d\n", g.coloring_distance);
     printf("Coloring_method = %d\n", g.coloring_method);
+    
+    get_sigma();
 
     printf("sigma: %d %d %d %d\n", g.sigma[0], g.sigma[1], g.sigma[2], g.sigma[3]);
+    printf("colors a the finest: %d\n", g.nc);
 
     dilution_check();
 
