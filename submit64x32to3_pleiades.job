@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=64x32to3_trace
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=4
+#SBATCH --nodes=16
+#SBATCH --ntasks-per-node=16
 #SBATCH --cpus-per-task=1
 #SBATCH --output=result
 #SBATCH --error=err_file
-#SBATCH --time=02:00:00
+#SBATCH --time=96:00:00
 #SBATCH --mail-type=ALL           # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=mariopapacee@gmail.com  # Your email address
 

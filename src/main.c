@@ -152,7 +152,7 @@ int main( int argc, char **argv ) {
        MALLOC(g.dilution_ml, int, g.num_levels);
        for(int i = 0; i<g.num_levels; i++){
          g.num_colors[i] = 1;
-	 g.dilution_ml[i] = 1;
+	     g.dilution_ml[i] = 1;
        }
     }
    

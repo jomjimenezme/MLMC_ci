@@ -397,8 +397,13 @@
     
     int **colors; //colors of the lattice
     int **local_colors; //colors of every MPI process 
+    
+    int sigma[4];
+    
     int *num_colors; //number of colors at every level
     int coloring_count;
+    int nc;
+    
     int dilution;
     int *dilution_ml;
     int dilution_count;
