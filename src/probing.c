@@ -120,8 +120,8 @@ void get_sigma(){
 
 void dilution_check(){
 
-  if(g.dilution != 1 && g.dilution != 2 && g.dilution != 3 && g.dilution != 12){
-    printf("\nError: choose a correct dilution value (1, 2, 3, 12)");
+  if(g.dilution != 1 && g.dilution != 2 && g.dilution != 3 && g.dilution != 4 && g.dilution != 12){
+    printf("\nError: choose a correct dilution value (1, 2, 3, 4, 12)");
     exit(1);
   }
 
@@ -129,10 +129,13 @@ void dilution_check(){
     printf("\nNo dilution");
 
   if(g.dilution == 2)
-    printf("\nSpin dilution");
+    printf("\nPartial spin dilution");
 
   if(g.dilution == 3)
     printf("\nColor dilution");
+
+  if(g.dilution == 4)
+    printf("\nComplete spin dilution");
 
   if(g.dilution == 12)
     printf("\nSpin-Color dilution");
